@@ -14,7 +14,6 @@ export class OperatorRegistryService {
   private isLive?: string
 
   private readonly operatorRegistryProcessId: string
-  private readonly operatorRegistryControllerKey: string
 
   constructor(
     private readonly config: ConfigService<{
@@ -31,15 +30,7 @@ export class OperatorRegistryService {
     })
     if (operatorRegistryPid != undefined) {
       this.operatorRegistryProcessId = operatorRegistryPid
-    } else this.logger.error('Missing relay rewards process id')
-
-    const operatorRegistryKey = this.config.get<string>('RELAY_REWARDS_CONTROLLER_KEY', {
-      infer: true,
-    })
-
-    if (operatorRegistryKey != undefined) {
-      this.operatorRegistryControllerKey = operatorRegistryKey
-    } else this.logger.error('Missing relay rewards controller key')
+    } else this.logger.error('Missing operator rewards process id')
   }
 
   public async getOperatorRegistryState(): Promise<OperatorRegistryState> {

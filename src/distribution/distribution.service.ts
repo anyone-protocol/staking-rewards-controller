@@ -146,15 +146,15 @@ export class DistributionService {
         }
       }
 
-      data[verifiedAddress].expected++
+      data[verifiedAddress].expected = data[verifiedAddress].expected + 1
     })
     
     relaysData.forEach(relay => {
       const verifiedAddress = verificationData[relay.fingerprint]
       if (verifiedAddress && verifiedAddress.length > 0) {
-        data[verifiedAddress].found++
+        data[verifiedAddress].found = data[verifiedAddress].found + 1
         if (relay.running && relay.consensus_weight > this.minHealthyConsensusWeight) {
-          data[verifiedAddress].running++
+          data[verifiedAddress].running = data[verifiedAddress].running + 1
         }
       } else {
         // this.logger.debug(`Found unverified relay ${relay.fingerprint}`)
@@ -163,18 +163,19 @@ export class DistributionService {
 
     const scores = []
 
-    Object.keys(data).forEach(hodler => {
-      const hodlerData = data[hodler]
-      Object.keys(hodlerData).forEach(operator => {
-        const runningShare = Math.max(0, Math.min(hodlerData.running / hodlerData.expected, 1))
-        const staked = stakingData[hodler][operator] ?? '0'
-        scores.push({
-          Hodler: hodler,
-          Operator: operator,
-          Running: runningShare,
-          Staked: staked
+    Object.keys(data).forEach(operator => {
+      const runningShare = Math.max(0, Math.min(data[operator].running / data[operator].expected, 1))
+      if (stakingData[operator]) {
+        Object.keys(stakingData[operator]).forEach(hodler => {
+          const staked = stakingData[operator][hodler] ?? '0'
+          scores.push({
+            Hodler: hodler,
+            Operator: operator,
+            Running: runningShare,
+            Staked: staked
+          })
         })
-      })
+      }
     })
 
     return scores

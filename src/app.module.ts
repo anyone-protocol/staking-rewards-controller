@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { DistributionModule } from './distribution/distribution.module'
 import { BullModule } from '@nestjs/bullmq'
 import { ClusterModule } from './cluster/cluster.module'
-import { RelayRewardsModule } from './staking-rewards/staking-rewards.module'
+import { StakingRewardsModule } from './staking-rewards/staking-rewards.module'
 import { OperatorRegistryModule } from './operator-registry/operator-registry.module'
 import { BundlingModule } from './bundling/bundling.module'
 
@@ -37,7 +37,7 @@ import { BundlingModule } from './bundling/bundling.module'
     BundlingModule,
     DistributionModule,
     ClusterModule,
-    RelayRewardsModule,
+    StakingRewardsModule,
     OperatorRegistryModule,
   ],
   controllers: [AppController],

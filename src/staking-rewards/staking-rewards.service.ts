@@ -26,7 +26,7 @@ export class StakingRewardsService {
       IS_LIVE: string
       STAKING_REWARDS_PROCESS_ID: string
       STAKING_REWARDS_CONTROLLER_KEY: string
-      HODLER_ADDRESS: string
+      HODLER_CONTRACT_ADDRESS: string
       EVM_JSON_RPC: string
     }>
   ) {
@@ -37,7 +37,7 @@ export class StakingRewardsService {
     
     const provider = new ethers.JsonRpcProvider(jsonRpc)
     
-    const hodlerAddress = this.config.get<string>('HODLER_ADDRESS', { infer: true })
+    const hodlerAddress = this.config.get<string>('HODLER_CONTRACT_ADDRESS', { infer: true })
     this.hodlerContract =  new ethers.Contract(
         hodlerAddress,
         hodlerABI,
@@ -73,10 +73,7 @@ export class StakingRewardsService {
     const keys = await this.hodlerContract.getHodlerKeys()
     for (const key of keys) {
       const stakes: { operator: string, amount: string }[] = await this.hodlerContract.getStakes(key)
-      stakes.forEach((stake) => {
-        this.logger.debug(`Found stake: ${stake}`)
-        result[key][stake.operator] = stake.amount
-      })
+      stakes.forEach((stake) => result[stake.operator][key] = stake.amount)
     }
 
     return result
