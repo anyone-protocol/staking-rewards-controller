@@ -27,7 +27,7 @@ export class ClusterService implements OnApplicationBootstrap, BeforeApplication
     private readonly config: ConfigService<{
       CONSUL_HOST: string
       CONSUL_PORT: number
-      CONSUL_TOKEN: string
+      CONSUL_TOKEN_CONTROLLER_CLUSTER: string
       SERVICE_NAME: string
       IS_LIVE: string
     }>
@@ -41,7 +41,7 @@ export class ClusterService implements OnApplicationBootstrap, BeforeApplication
       if (host != undefined && port != undefined) {
         this.serviceName = this.config.get<string>('SERVICE_NAME', { infer: true })
         this.serviceId = `${this.serviceName}-${uuidv4()}`
-        const consulToken = this.config.get<string>('CONSUL_TOKEN', { infer: true })
+        const consulToken = this.config.get<string>('CONSUL_TOKEN_CONTROLLER_CLUSTER', { infer: true })
 
         this.logger.log(`Connecting to Consul at ${host}:${port} with service: ${this.serviceName}`)
         this.consul = new Consul({ host, port, defaults: { token: consulToken } })
