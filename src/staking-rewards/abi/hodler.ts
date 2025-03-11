@@ -841,6 +841,16 @@ export const hodlerABI = [
             "internalType": "uint256",
             "name": "availableAt",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "kind",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "data",
+            "type": "string"
           }
         ],
         "internalType": "struct Hodler.VaultData[]",
