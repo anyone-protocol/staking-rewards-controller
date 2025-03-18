@@ -36,7 +36,7 @@ job "staking-rewards-controller-stage" {
         VERSION="[[.commit_sha]]"
         BUNDLER_GATEWAY="https://ar.anyone.tech"
         BUNDLER_NODE="https://ar.anyone.tech/bundler"
-        CPU_COUNT="2"
+        CPU_COUNT="1"
         CONSUL_HOST="${NOMAD_IP_http}"
         CONSUL_PORT="8500"
         SERVICE_NAME="staking-rewards-controller-stage"
