@@ -45,6 +45,7 @@ job "staking-rewards-controller-stage" {
         PORT="${NOMAD_PORT_http}"
         NO_COLOR="1"
         MIN_HEALTHY_CONSENSUS_WEIGHT="50"
+        CU_URL="https://cu.ardrive.io"
       }
 
       template {
@@ -58,6 +59,7 @@ job "staking-rewards-controller-stage" {
           CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
         {{end}}
 
+        STAKING_REWARDS_PROCESS_ID="[[ consulKey "smart-contracts/stage/staking-rewards-address" ]]"
         OPERATOR_REGISTRY_PROCESS_ID="[[ consulKey "smart-contracts/stage/operator-registry-address" ]]"
         TOKEN_CONTRACT_ADDRESS="[[ consulKey "ator-token/sepolia/stage/address" ]]"
         HODLER_CONTRACT_ADDRESS="[[ consulKey "hodler/sepolia/stage/address" ]]"
