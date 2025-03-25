@@ -19,6 +19,7 @@ job "staking-rewards-controller-stage" {
     }
 
     task "staking-rewards-controller-stage-service" {
+      kill_timeout = "30s"
       driver = "docker"
       config {
         network_mode = "host"
