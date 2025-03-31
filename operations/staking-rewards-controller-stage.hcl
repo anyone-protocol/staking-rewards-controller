@@ -4,7 +4,7 @@ job "staking-rewards-controller-stage" {
 
   group "staking-rewards-controller-stage-group" {
     
-    count = 2
+    count = 1
 
     update {
       max_parallel     = 1
