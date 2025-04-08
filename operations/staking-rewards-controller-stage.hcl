@@ -46,7 +46,7 @@ job "staking-rewards-controller-stage" {
         PORT="${NOMAD_PORT_http}"
         NO_COLOR="1"
         MIN_HEALTHY_CONSENSUS_WEIGHT="50"
-        CU_URL="https://cu.ardrive.io"
+        CU_URL="https://cu.anyone.permaweb.services"
       }
 
       template {
