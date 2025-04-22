@@ -178,6 +178,44 @@ export class DistributionService {
       }
     })
 
+    const stakesSummary = {}
+    Object.keys(stakingData).forEach(operator => {
+      var stakePerOperator = BigInt(0)
+      Object.values(stakingData[operator]).forEach(stake => {
+        stakePerOperator += BigInt(stake)
+      })
+      stakesSummary[operator] = stakePerOperator.toString()
+    })
+
+    const summary = {
+      Timestamp: stamp,
+      Stakes: stakesSummary,
+      Network: data
+    }
+
+    
+    if (this.isLive !== 'true') {
+      this.logger.warn(`NOT LIVE: Not storing staking/snapshot [${stamp}]`)
+    } else {
+      try {
+        const tags = [
+          { name: 'Protocol', value: 'ANyONe' },
+          { name: 'Protocol-Version', value: '0.2' },
+          { name: 'Content-Timestamp', value: stamp.toString() },
+          { name: 'Content-Type', value: 'application/json' },
+          { name: 'Entity-Type', value: 'staking/snapshot' },
+        ]
+
+        const { id: summary_tx } = await this.bundlingService.upload(
+          JSON.stringify(data), { tags }
+        )
+
+        this.logger.log(`Permanently stored staking/snaphot [${stamp}]: ${summary_tx}`)
+      } catch (error) {
+        this.logger.error(`Exception in staking distribution service persisting snapshot: ${error.message}`, error.stack)
+      }
+    }
+
     return scores
   }
 
@@ -217,7 +255,7 @@ export class DistributionService {
     }
     try {
       if (this.isLive !== 'true') {
-        this.logger.warn(`NOT LIVE: Not storing distribution/summary [${snapshot.Timestamp}]`)
+        this.logger.warn(`NOT LIVE: Not storing staking/summary [${snapshot.Timestamp}]`)
 
         return false
       }
@@ -245,11 +283,11 @@ export class DistributionService {
         { tags }
       )
 
-      this.logger.log(`Permanently stored distribution/summary [${stamp}]: ${summary_tx}`)
+      this.logger.log(`Permanently stored staking/summary [${stamp}]: ${summary_tx}`)
       this.tasksService.updateDistribution(stamp, true, true)
       return true
     } catch (error) {
-      this.logger.error(`Exception in distribution service persisting round: ${error.message}`, error.stack)
+      this.logger.error(`Exception in staking distribution service persisting round: ${error.message}`, error.stack)
     }
 
     return false
