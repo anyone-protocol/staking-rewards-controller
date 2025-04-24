@@ -79,7 +79,7 @@ job "staking-rewards-controller-stage" {
 
         {{ $apiKeyPrefix := "api_key_" }}
         {{ $allocIndex := env "NOMAD_ALLOC_INDEX" }}
-        {{ with secret "kv/jsonrpc/stage/operator-registry-controller/infura/eth" }}
+        {{ with secret "kv/jsonrpc/stage/staking-rewards-controller/infura/eth" }}
           EVM_JSON_RPC="https://sepolia.infura.io/v3/{{ index .Data.data (print $apiKeyPrefix $allocIndex) }}"
         {{ end }}
         EOH
