@@ -34,7 +34,10 @@ export class StakingRewardsService {
 
     this.logger.log(`Initializing staking rewards service (IS_LIVE: ${this.isLive})`)
     const jsonRpc = this.config.get<string>('EVM_JSON_RPC', { infer: true })
-    
+    if (!jsonRpc) {
+      this.logger.error('Missing EVM JSON RPC URL')
+      throw new Error('Missing EVM JSON RPC URL')
+    }
     const provider = new ethers.JsonRpcProvider(jsonRpc)
     
     const hodlerAddress = this.config.get<string>('HODLER_CONTRACT_ADDRESS', { infer: true })
