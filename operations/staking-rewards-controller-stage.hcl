@@ -28,7 +28,7 @@ job "staking-rewards-controller-stage" {
       }
 
       vault {
-        policies = ["staking-rewards-stage"]
+        policies = ["staking-rewards-stage", "jsonrpc-stage-staking-rewards-controller-eth"]
       }
 
       env {
