@@ -56,7 +56,6 @@ job "staking-rewards-controller-stage" {
           REWARDS_POOL_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
           BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
           BUNDLER_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
-          EVM_JSON_RPC="{{.Data.data.EVM_JSON_RPC}}"
           CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
         {{end}}
 
@@ -77,6 +76,12 @@ job "staking-rewards-controller-stage" {
         {{- end }}
         ONIONOO_REQUEST_TIMEOUT="60000"
         ONIONOO_REQUEST_MAX_REDIRECTS="3"
+
+        {{ $apiKeyPrefix := "api_key_" }}
+        {{ $allocIndex := env "NOMAD_ALLOC_INDEX" }}
+        {{ with secret "kv/jsonrpc/stage/operator-registry-controller/infura/eth" }}
+          EVM_JSON_RPC="https://sepolia.infura.io/v3/{{ index .Data.data (print $apiKeyPrefix $allocIndex) }}"
+        {{ end }}
         EOH
         destination = "secrets/file.env"
         env         = true
