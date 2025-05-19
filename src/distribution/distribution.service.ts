@@ -207,7 +207,7 @@ export class DistributionService {
         ]
 
         const { id: summary_tx } = await this.bundlingService.upload(
-          JSON.stringify(data), { tags }
+          JSON.stringify(summary), { tags }
         )
 
         this.logger.log(`Permanently stored staking/snaphot [${stamp}]: ${summary_tx}`)
