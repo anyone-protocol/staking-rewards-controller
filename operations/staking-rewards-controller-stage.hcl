@@ -1,6 +1,7 @@
 job "staking-rewards-controller-stage" {
   datacenters = ["ator-fin"]
   type = "service"
+  namespace = "stage-protocol"
 
   group "staking-rewards-controller-stage-group" {
     
@@ -28,7 +29,13 @@ job "staking-rewards-controller-stage" {
       }
 
       vault {
-        policies = ["staking-rewards-stage", "jsonrpc-stage-staking-rewards-controller-eth"]
+        role = "any1-nomad-workloads-controller"
+      }
+
+      identity {
+        name = "vault_default"
+        aud  = ["any1-infra"]
+        ttl  = "1h"
       }
 
       env {
@@ -51,14 +58,6 @@ job "staking-rewards-controller-stage" {
 
       template {
         data = <<EOH
-        {{with secret "kv/staking-rewards/stage"}}
-          STAKING_REWARDS_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
-          REWARDS_POOL_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
-          BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
-          BUNDLER_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
-          CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
-        {{end}}
-
         STAKING_REWARDS_PROCESS_ID="[[ consulKey "smart-contracts/stage/staking-rewards-address" ]]"
         OPERATOR_REGISTRY_PROCESS_ID="[[ consulKey "smart-contracts/stage/operator-registry-address" ]]"
         TOKEN_CONTRACT_ADDRESS="[[ consulKey "ator-token/sepolia/stage/address" ]]"
@@ -76,14 +75,24 @@ job "staking-rewards-controller-stage" {
         {{- end }}
         ONIONOO_REQUEST_TIMEOUT="60000"
         ONIONOO_REQUEST_MAX_REDIRECTS="3"
+        EOH
+        destination = "local/config.env"
+        env         = true
+      }
 
-        {{ $apiKeyPrefix := "api_key_" }}
+      template {
+        data = <<EOH
         {{ $allocIndex := env "NOMAD_ALLOC_INDEX" }}
-        {{ with secret "kv/jsonrpc/stage/staking-rewards-controller/infura/eth" }}
-          EVM_JSON_RPC="https://sepolia.infura.io/v3/{{ index .Data.data (print $apiKeyPrefix $allocIndex) }}"
+        {{ with secret "kv/stage-protocol/staking-rewards-controller-stage" }}
+          STAKING_REWARDS_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
+          REWARDS_POOL_KEY="{{.Data.data.REWARDS_POOL_KEY}}"
+          BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
+          BUNDLER_CONTROLLER_KEY="{{.Data.data.BUNDLER_CONTROLLER_KEY}}"
+          CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
+          EVM_JSON_RPC="https://sepolia.infura.io/v3/{{ index .Data.data (print `INFURA_SEPOLIA_API_KEY_` $allocIndex) }}"
         {{ end }}
         EOH
-        destination = "secrets/file.env"
+        destination = "secrets/keys.env"
         env         = true
       }
       

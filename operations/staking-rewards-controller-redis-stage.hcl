@@ -1,6 +1,7 @@
 job "staking-rewards-controller-redis-stage" {
   datacenters = ["ator-fin"]
   type = "service"
+  namespace = "stage-protocol"
 
   group "staking-rewards-controller-redis-stage-group" {
     count = 1
