@@ -54,7 +54,7 @@ job "staking-rewards-controller-stage" {
         CONSUL_PORT="8500"
         SERVICE_NAME="staking-rewards-controller-stage"
         ROUND_PERIOD_SECONDS="900"
-        DO_CLEAN="false"
+        DO_CLEAN="true"
         PORT="${NOMAD_PORT_http}"
         NO_COLOR="1"
         MIN_HEALTHY_CONSENSUS_WEIGHT="50"
