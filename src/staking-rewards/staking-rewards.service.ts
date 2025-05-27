@@ -80,7 +80,12 @@ export class StakingRewardsService {
     const keys = await this.hodlerContract.getHodlerKeys()
     for (const key of keys) {
       const stakes: { operator: string, amount: string }[] = await this.hodlerContract.getStakes(key)
-      stakes.forEach((stake) => result[stake.operator][key] = stake.amount)
+      stakes.forEach((stake) => {
+        if (!result[stake.operator]) {
+          result[stake.operator] = {}
+        }
+        result[stake.operator][key] = stake.amount
+      })
     }
 
     return result
