@@ -3,6 +3,11 @@ job "staking-rewards-controller-stage" {
   type = "service"
   namespace = "stage-protocol"
 
+  constraint {
+    attribute = "${meta.pool}"
+    value = "stage"
+  }
+
   group "staking-rewards-controller-stage-group" {
     
     count = 1
