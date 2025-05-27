@@ -86,7 +86,9 @@ export class StakingRewardsService {
         }
         result[stake.operator][key] = stake.amount
       })
+      this.logger.log(`Fetched staking data [${stakes.length}] for hodler ${key}`)
     }
+    this.logger.log(`Fetched staking data for ${Object.keys(result).length} operators`)
 
     return result
   }
