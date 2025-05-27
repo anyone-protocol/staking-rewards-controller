@@ -46,6 +46,10 @@ export class StakingRewardsService {
         hodlerABI,
         provider
       )
+    
+    if (!this.hodlerContract) {
+      this.logger.error('Failed to initialize HODLER contract')
+    } else this.logger.log(`HODLER contract initialized at address: ${hodlerAddress}`)
 
     const stakingRewardsPid = this.config.get<string>('STAKING_REWARDS_PROCESS_ID', {
       infer: true,
