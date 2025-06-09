@@ -116,7 +116,7 @@ export class DistributionQueue extends WorkerHost {
         { processed: 0, failed: 0 }
       )
 
-      if (processed.length < job.data.total) {
+      if (processed < job.data.total) {
         this.logger.warn(`Processed less score groups (${processed}) then the total found (${job.data.total})`)
       } else if (processed == 0) {
         this.logger.warn(`No scores found to process`)
@@ -124,7 +124,7 @@ export class DistributionQueue extends WorkerHost {
         this.logger.log(`Processed ${processed} score group(s)`)
       }
 
-      if (processed.length > 0) {
+      if (processed > 0) {
         return this.distribution.complete(job.data.stamp)
       } else {
         return false
