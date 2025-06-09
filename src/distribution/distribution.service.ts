@@ -182,8 +182,8 @@ export class DistributionService {
     const stakesSummary = {}
     Object.keys(stakingData).forEach(operator => {
       var stakePerOperator = BigInt(0)
-      Object.values(stakingData[operator]).forEach(stake => {
-        stakePerOperator += BigInt(stake)
+      Object.values(stakingData[operator]).forEach(hodler => {
+        stakePerOperator += BigInt(stakingData[operator][hodler] || '0')
       })
       stakesSummary[operator] = stakePerOperator.toString()
     })

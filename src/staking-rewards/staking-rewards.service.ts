@@ -76,7 +76,7 @@ export class StakingRewardsService {
 
   public async getHodlerData(): Promise<{
     locksData: { [key: string]: string[] },
-    stakingData: { [key: string]: { [key: string]: number }}
+    stakingData: { [key: string]: { [key: string]: string }}
   }> {
     const locksData = {}
     const stakingData = {}
