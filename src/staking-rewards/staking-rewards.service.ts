@@ -152,7 +152,7 @@ export class StakingRewardsService {
         })
 
         if (!result.Error) {
-          this.logger.log(`[${stamp}] Add-Scores ${Object.keys(scores).length}: ${messageId ?? 'no-message-id'}`)
+          this.logger.log(`[${stamp}] Add-Scores for ${Object.keys(scores).length} hodlers: ${messageId ?? 'no-message-id'}`)
 
           return true
         } else {
