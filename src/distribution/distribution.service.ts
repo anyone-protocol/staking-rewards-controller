@@ -231,11 +231,13 @@ export class DistributionService {
   public async addScores(stamp: number, scores: ScoreData[]): Promise<boolean> {
     const scoresForLua: AddScoresData = {}
     scores.forEach(score => {
-      if (!scoresForLua[score.Hodler]) {
-        scoresForLua[score.Hodler] = {}
+      const hodlerNormalized = score.Hodler.toUpperCase()
+      const operatorNormalized = score.Operator.toUpperCase()
+      if (!scoresForLua[hodlerNormalized]) {
+        scoresForLua[hodlerNormalized] = {}
       }
 
-      scoresForLua[score.Hodler][score.Operator] = {
+      scoresForLua[hodlerNormalized][operatorNormalized] = {
         Staked: score.Staked,
         Running: score.Running
       }
