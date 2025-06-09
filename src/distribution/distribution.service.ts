@@ -156,10 +156,9 @@ export class DistributionService {
         data[verifiedAddress].found = data[verifiedAddress].found + 1
 
         const pVA = ethers.getAddress(verifiedAddress)
-        const pLA = ethers.getAddress(locksData[relay.fingerprint])
 
-        if (pVA == pLA && relay.running && 
-            relay.consensus_weight > this.minHealthyConsensusWeight) {
+        if (locksData[relay.fingerprint] && locksData[relay.fingerprint].includes(pVA) && 
+            relay.running && relay.consensus_weight > this.minHealthyConsensusWeight) {
           data[verifiedAddress].running = data[verifiedAddress].running + 1
         }
       } else {

@@ -75,7 +75,7 @@ export class StakingRewardsService {
   }
 
   public async getHodlerData(): Promise<{
-    locksData: { [key: string]: string },
+    locksData: { [key: string]: string[] },
     stakingData: { [key: string]: { [key: string]: number }}
   }> {
     const locksData = {}
@@ -86,9 +86,11 @@ export class StakingRewardsService {
       const locks: { fingerprint: string, operator: string, amount: string }[] = await this.hodlerContract.getLocks(key)
       locks.forEach((lock) => {
         if (!locksData[lock.fingerprint]) {
-          locksData[lock.fingerprint] = {}
+          locksData[lock.fingerprint] = []
         }
-        locksData[lock.fingerprint] = lock.operator
+        if (!locksData[lock.fingerprint].includes(lock.operator)) {
+          locksData[lock.fingerprint].push(ethers.getAddress(lock.operator))
+        }
       })
 
       const stakes: { operator: string, amount: string }[] = await this.hodlerContract.getStakes(key)
