@@ -129,6 +129,7 @@ export class DistributionService {
     const { locksData, stakingData} = await this.stakingRewardsService.getHodlerData()
     const operatorRegistryState = await this.operatorRegistryService.getOperatorRegistryState()
     const verificationData = operatorRegistryState.VerifiedFingerprintsToOperatorAddresses
+    const isHardware = operatorRegistryState.VerifiedHardwareFingerprints
     
     const data: { [key: string]: {
       expected: number,
@@ -153,7 +154,10 @@ export class DistributionService {
         const pVA = ethers.getAddress(verifiedAddress)
         data[pVA].found = data[pVA].found + 1
 
-        if (locksData[relay.fingerprint] && locksData[relay.fingerprint].includes(pVA) && 
+        if ((
+              isHardware[relay.fingerprint] ||
+              (locksData[relay.fingerprint] && locksData[relay.fingerprint].includes(pVA)) 
+            ) && 
             relay.running && relay.consensus_weight > this.minHealthyConsensusWeight) {
           data[pVA].running = data[pVA].running + 1
         }
@@ -226,7 +230,7 @@ export class DistributionService {
       if (!scoresForLua[score.Hodler]) {
         scoresForLua[score.Hodler] = {}
       }
-      
+
       scoresForLua[score.Hodler][score.Operator] = {
         Staked: score.Staked,
         Running: score.Running
