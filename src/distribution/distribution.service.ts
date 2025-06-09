@@ -138,28 +138,24 @@ export class DistributionService {
 
     Object.keys(verificationData).forEach(fingerprint => {
       const verifiedAddress = verificationData[fingerprint]
-      
-      if (!data[verifiedAddress]) {
-        data[verifiedAddress] = {
-          expected: 0,
-          running: 0,
-          found: 0
+      if (verifiedAddress && verifiedAddress.length > 0) {
+        const pVA = ethers.getAddress(verifiedAddress)
+        if (!data[pVA]) {
+          data[pVA] = { expected: 0, running: 0, found: 0 }
         }
+        data[pVA].expected = data[pVA].expected + 1
       }
-
-      data[verifiedAddress].expected = data[verifiedAddress].expected + 1
     })
     
     relaysData.forEach(relay => {
       const verifiedAddress = verificationData[relay.fingerprint]
       if (verifiedAddress && verifiedAddress.length > 0) {
-        data[verifiedAddress].found = data[verifiedAddress].found + 1
-
         const pVA = ethers.getAddress(verifiedAddress)
+        data[pVA].found = data[pVA].found + 1
 
         if (locksData[relay.fingerprint] && locksData[relay.fingerprint].includes(pVA) && 
             relay.running && relay.consensus_weight > this.minHealthyConsensusWeight) {
-          data[verifiedAddress].running = data[verifiedAddress].running + 1
+          data[pVA].running = data[pVA].running + 1
         }
       } else {
         // this.logger.debug(`Found unverified relay ${relay.fingerprint}`)
