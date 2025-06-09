@@ -103,7 +103,7 @@ export class StakingRewardsService {
           if (!stakingData[operatorAddress]) {
             stakingData[operatorAddress] = {}
           }
-          stakingData[operatorAddress][hodlerAddress] = stake.amount
+          stakingData[operatorAddress][hodlerAddress] = BigInt(stake.amount).toString()
         }
       })
       this.logger.log(`Fetched staking data [${stakes.length}] for hodler ${hodlerAddress}`)
