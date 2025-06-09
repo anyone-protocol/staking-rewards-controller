@@ -170,6 +170,7 @@ export class DistributionService {
 
     Object.keys(data).forEach(operator => {
       const runningShare = Math.max(0, Math.min(data[operator].running / data[operator].expected, 1))
+      this.logger.log(`Operator ${operator} has ${data[operator].expected} expected, ${data[operator].running} running and ${data[operator].found} found relays. Running share: ${runningShare}`)
       if (stakingData[operator]) {
         Object.keys(stakingData[operator]).forEach(hodler => {
           const staked = stakingData[operator][hodler] ?? '0'
