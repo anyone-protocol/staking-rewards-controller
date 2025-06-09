@@ -107,9 +107,9 @@ export class DistributionQueue extends WorkerHost {
       const { processed, failed } = jobsData.reduce(
         (acc, curr) => {
           if (curr.result) {
-            acc.processed++
+            acc.processed += curr.scored
           } else {
-            acc.failed++
+            acc.failed += curr.scored
           }
           return acc
         },
@@ -117,11 +117,11 @@ export class DistributionQueue extends WorkerHost {
       )
 
       if (processed < job.data.total) {
-        this.logger.warn(`Processed less score groups (${processed}) then the total found (${job.data.total})`)
+        this.logger.warn(`Processed less scores (${processed}) then the total found (${job.data.total})`)
       } else if (processed == 0) {
         this.logger.warn(`No scores found to process`)
       } else {
-        this.logger.log(`Processed ${processed} score group(s)`)
+        this.logger.log(`Processed ${processed} score(s)`)
       }
 
       if (processed > 0) {
