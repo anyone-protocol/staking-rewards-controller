@@ -231,8 +231,8 @@ export class DistributionService {
   public async addScores(stamp: number, scores: ScoreData[]): Promise<boolean> {
     const scoresForLua: AddScoresData = {}
     scores.forEach(score => {
-      const hodlerNormalized = score.Hodler.toUpperCase()
-      const operatorNormalized = score.Operator.toUpperCase()
+      const hodlerNormalized = '0x' + score.Hodler.substring(2).toUpperCase()
+      const operatorNormalized = '0x' + score.Operator.substring(2).toUpperCase()
       if (!scoresForLua[hodlerNormalized]) {
         scoresForLua[hodlerNormalized] = {}
       }
