@@ -74,23 +74,35 @@ export class StakingRewardsService {
     this.logger.log(`Bootstrapped with signer address ${address}`)
   }
 
-  public async getStakingData(): Promise<{ [key: string]: { [key: string]: number }}> {
-    const result = {}
+  public async getHodlerData(): Promise<{
+    locksData: { [key: string]: string },
+    stakingData: { [key: string]: { [key: string]: number }}
+  }> {
+    const locksData = {}
+    const stakingData = {}
 
     const keys = await this.hodlerContract.getHodlerKeys()
     for (const key of keys) {
+      const locks: { fingerprint: string, operator: string, amount: string }[] = await this.hodlerContract.getLocks(key)
+      locks.forEach((lock) => {
+        if (!locksData[lock.fingerprint]) {
+          locksData[lock.fingerprint] = {}
+        }
+        locksData[lock.fingerprint] = lock.operator
+      })
+
       const stakes: { operator: string, amount: string }[] = await this.hodlerContract.getStakes(key)
       stakes.forEach((stake) => {
-        if (!result[stake.operator]) {
-          result[stake.operator] = {}
+        if (!stakingData[stake.operator]) {
+          stakingData[stake.operator] = {}
         }
-        result[stake.operator][key] = stake.amount
+        stakingData[stake.operator][key] = stake.amount
       })
       this.logger.log(`Fetched staking data [${stakes.length}] for hodler ${key}`)
     }
-    this.logger.log(`Fetched staking data for ${Object.keys(result).length} operators`)
+    this.logger.log(`Fetched staking data for ${Object.keys(stakingData).length} operators`)
 
-    return result
+    return { stakingData, locksData }
   }
 
   public async getLastSnapshot(): Promise<RoundSnapshot | undefined> {

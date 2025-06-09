@@ -18,6 +18,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { differenceInDays, startOfDay, subDays } from 'date-fns'
 import { BundlingService } from '../bundling/bundling.service'
+import { ethers, lock } from 'ethers'
 
 @Injectable()
 export class DistributionService {
@@ -125,7 +126,7 @@ export class DistributionService {
 
   public async getCurrentScores(stamp: number): Promise<ScoreData[]> {
     const relaysData = await this.fetchRelays()
-    const stakingData = await this.stakingRewardsService.getStakingData()
+    const { locksData, stakingData} = await this.stakingRewardsService.getHodlerData()
     const operatorRegistryState = await this.operatorRegistryService.getOperatorRegistryState()
     const verificationData = operatorRegistryState.VerifiedFingerprintsToOperatorAddresses
     
@@ -153,7 +154,12 @@ export class DistributionService {
       const verifiedAddress = verificationData[relay.fingerprint]
       if (verifiedAddress && verifiedAddress.length > 0) {
         data[verifiedAddress].found = data[verifiedAddress].found + 1
-        if (relay.running && relay.consensus_weight > this.minHealthyConsensusWeight) {
+
+        const pVA = ethers.getAddress(verifiedAddress)
+        const pLA = ethers.getAddress(locksData[relay.fingerprint])
+
+        if (pVA == pLA && relay.running && 
+            relay.consensus_weight > this.minHealthyConsensusWeight) {
           data[verifiedAddress].running = data[verifiedAddress].running + 1
         }
       } else {
