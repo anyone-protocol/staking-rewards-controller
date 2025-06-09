@@ -176,6 +176,7 @@ export class StakingRewardsService {
     }
 
     try {
+      this.logger.log(`Completing round for ${stamp}...`)
       const { messageId, result } = await sendAosMessage({
         processId: this.stakingRewardsProcessId,
         signer: this.signer as any, // NB: types, lol
@@ -183,6 +184,7 @@ export class StakingRewardsService {
           { name: 'Action', value: 'Complete-Round' },
           { name: 'Timestamp', value: stamp.toString() },
         ],
+        data: JSON.stringify({})
       })
 
       if (!result.Error) {
