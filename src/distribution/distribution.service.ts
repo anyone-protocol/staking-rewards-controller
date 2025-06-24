@@ -174,12 +174,14 @@ export class DistributionService {
       if (stakingData[operator]) {
         Object.keys(stakingData[operator]).forEach(hodler => {
           const staked = stakingData[operator][hodler] ?? '0'
-          scores.push({
-            Hodler: hodler,
-            Operator: operator,
-            Running: runningShare,
-            Staked: staked
-          })
+          if (staked !== '0') {
+            scores.push({
+              Hodler: hodler,
+              Operator: operator,
+              Running: runningShare,
+              Staked: staked
+            })
+          }
         })
       }
     })
@@ -193,7 +195,10 @@ export class DistributionService {
         }
       })
       this.logger.debug(`Operator ${operator} has total stake of ${stakePerOperator.toString()}`)
-      stakesSummary[operator] = stakePerOperator.toString()
+      const staked = stakePerOperator.toString()
+      if (staked !== '0') {
+        stakesSummary[operator] = staked
+      }
     })
 
     const summary = {
@@ -201,7 +206,6 @@ export class DistributionService {
       Stakes: stakesSummary,
       Network: data
     }
-
     
     if (this.isLive !== 'true') {
       this.logger.warn(`NOT LIVE: Not storing staking/snapshot [${stamp}]`)
