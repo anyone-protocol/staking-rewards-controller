@@ -12,15 +12,21 @@ interface FingerprintGeoLocationMap {
   [fingerprint:string]: FingerprintGeoLocation
 }
 
+const DEFAULT_CACHE_TTL = 60 * 60 * 1000 // 1 hour in milliseconds
+
 @Injectable()
 export class GeoIpService implements OnApplicationBootstrap {
   private readonly logger = new Logger(GeoIpService.name)
   public fingerprintMapData: FingerprintGeoLocationMap = {}
   public lastResponseTimestamp: number | undefined
-  private readonly anyoneApiUrl: string  
+  private readonly anyoneApiUrl: string
+  private readonly anyoneApiCacheTtl: number
 
   constructor(
-    readonly config: ConfigService<{ ANYONE_API_URL: string }>,
+    readonly config: ConfigService<{
+      ANYONE_API_URL: string
+      ANYONE_API_CACHE_TTL?: number
+    }>,
     private readonly httpService: HttpService
   ) {
     this.logger.log('Initializing geo ip service')
@@ -32,9 +38,15 @@ export class GeoIpService implements OnApplicationBootstrap {
     if (!this.anyoneApiUrl) {
       throw new Error('ANYONE_API_URL is not set!')
     }
-    
+
+    this.anyoneApiCacheTtl = config.get<number>(
+      'ANYONE_API_CACHE_TTL',
+      { infer: true }
+    ) || DEFAULT_CACHE_TTL
+
     this.logger.log(
       `Initialized geo ip service with Anyone API Url [${this.anyoneApiUrl}]`
+      + ` and cache TTL [${this.anyoneApiCacheTtl}] ms`
     )
   }
 
@@ -44,10 +56,9 @@ export class GeoIpService implements OnApplicationBootstrap {
 
   async cacheCheck() {
     this.logger.log('Checking fingerprint map cache...')
-    const oneWeekInMs = 7 * 24 * 60 * 60 * 1000
     const elapsedSinceLastResponse = this.lastResponseTimestamp && Date.now()
       - new Date(this.lastResponseTimestamp).getTime()
-    if (elapsedSinceLastResponse > oneWeekInMs) {
+    if (elapsedSinceLastResponse > this.anyoneApiCacheTtl) {
       this.logger.log(
         `Refreshing fingerprint map data after `
         + `[${elapsedSinceLastResponse}] ms`
