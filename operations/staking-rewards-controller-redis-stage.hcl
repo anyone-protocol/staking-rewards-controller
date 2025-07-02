@@ -1,6 +1,12 @@
 job "staking-rewards-controller-redis-stage" {
   datacenters = ["ator-fin"]
   type = "service"
+  namespace = "stage-protocol"
+
+  constraint {
+    attribute = "${meta.pool}"
+    value = "stage"
+  }
 
   group "staking-rewards-controller-redis-stage-group" {
     count = 1
@@ -11,6 +17,20 @@ job "staking-rewards-controller-redis-stage" {
         host_network = "wireguard"
       }
     }
+
+    service {
+      name = "staking-rewards-controller-redis-stage"
+      port = "redis"
+      
+      check {
+        name     = "relay rewards controller stage redis health check"
+        type     = "tcp"
+        interval = "5s"
+        timeout  = "10s"
+        address_mode = "alloc"
+      }
+    }
+
     task "staking-rewards-controller-redis-stage" {
       driver = "docker"
       config {
@@ -24,18 +44,6 @@ job "staking-rewards-controller-redis-stage" {
       resources {
         cpu    = 512
         memory = 512
-      }
-
-      service {
-        name = "staking-rewards-controller-redis-stage"
-        port = "redis"
-        
-        check {
-          name     = "relay rewards controller stage redis health check"
-          type     = "tcp"
-          interval = "5s"
-          timeout  = "10s"
-        }
       }
 
       template {

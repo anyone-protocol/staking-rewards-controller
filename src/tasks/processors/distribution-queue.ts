@@ -101,40 +101,37 @@ export class DistributionQueue extends WorkerHost {
   }
 
   async completeDistributionHandler(job: Job<{ stamp: number; total: number }, boolean, string>): Promise<boolean> {
-    return job.getChildrenValues().then(
-      jobValues => {
-        const jobsData = Object.values(jobValues)
-        const { processed, failed } = jobsData.reduce(
-          (acc, curr) => {
-            if (curr.result) {
-              acc.processed++
-            } else {
-              acc.failed++
-            }
-            return acc
-          },
-          { processed: 0, failed: 0 }
-        )
+    try {
+      const jobValues = await job.getChildrenValues()
+      const jobsData = Object.values(jobValues)
+      const { processed, failed } = jobsData.reduce(
+        (acc, curr) => {
+          if (curr.result) {
+            acc.processed += curr.scored
+          } else {
+            acc.failed += curr.scored
+          }
+          return acc
+        },
+        { processed: 0, failed: 0 }
+      )
 
-        if (processed.length < job.data.total) {
-          this.logger.warn(`Processed less scores (${processed}) then the total found (${job.data.total})`)
-        } else if (processed == 0) {
-          this.logger.warn(`No scores found to process`)
-        } else {
-          this.logger.log(`Processed ${processed} scores`)
-        }
+      if (processed < job.data.total) {
+        this.logger.warn(`Processed less scores (${processed}) then the total found (${job.data.total})`)
+      } else if (processed == 0) {
+        this.logger.warn(`No scores found to process`)
+      } else {
+        this.logger.log(`Processed ${processed} score(s)`)
+      }
 
-        if (processed.length > 0) {
-          return this.distribution.complete(job.data.stamp)
-        } else {
-          return false
-        }
-      },
-      error => {
-        this.logger.error(`Exception while completing distribution: ${error.message}`, error.stack)
+      if (processed > 0) {
+        return this.distribution.complete(job.data.stamp)
+      } else {
         return false
       }
-    )
+    } catch (err) {
+      this.logger.error(`Exception completing distribution [${job.data.stamp}]`, err.stack)
+    }
   }
 
   async persistDistributionHandler(job: Job<{ stamp: number }, boolean, string>): Promise<boolean> {

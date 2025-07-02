@@ -46,6 +46,10 @@ export class StakingRewardsService {
         hodlerABI,
         provider
       )
+    
+    if (!this.hodlerContract) {
+      this.logger.error('Failed to initialize HODLER contract')
+    } else this.logger.log(`HODLER contract initialized at address: ${hodlerAddress}`)
 
     const stakingRewardsPid = this.config.get<string>('STAKING_REWARDS_PROCESS_ID', {
       infer: true,
@@ -70,16 +74,43 @@ export class StakingRewardsService {
     this.logger.log(`Bootstrapped with signer address ${address}`)
   }
 
-  public async getStakingData(): Promise<{ [key: string]: { [key: string]: number }}> {
-    const result = {}
+  public async getHodlerData(): Promise<{
+    locksData: { [key: string]: string[] },
+    stakingData: { [key: string]: { [key: string]: string }}
+  }> {
+    const locksData = {}
+    const stakingData = {}
 
     const keys = await this.hodlerContract.getHodlerKeys()
     for (const key of keys) {
-      const stakes: { operator: string, amount: string }[] = await this.hodlerContract.getStakes(key)
-      stakes.forEach((stake) => result[stake.operator][key] = stake.amount)
-    }
+      const hodlerAddress = ethers.getAddress(key)
 
-    return result
+      const locks: { fingerprint: string, operator: string, amount: string }[] = await this.hodlerContract.getLocks(hodlerAddress)
+      locks.forEach((lock) => {
+        if (!locksData[lock.fingerprint]) {
+          locksData[lock.fingerprint] = []
+        }
+        const operatorAddress = ethers.getAddress(lock.operator)
+        if (!locksData[lock.fingerprint].includes(operatorAddress)) {
+          locksData[lock.fingerprint].push(operatorAddress)
+        }
+      })
+
+      const stakes: { operator: string, amount: string }[] = await this.hodlerContract.getStakes(hodlerAddress)
+      stakes.forEach((stake) => {
+        const operatorAddress = ethers.getAddress(stake.operator)
+        if (operatorAddress && operatorAddress.length > 0) {
+          if (!stakingData[operatorAddress]) {
+            stakingData[operatorAddress] = {}
+          }
+          stakingData[operatorAddress][hodlerAddress] = BigInt(stake.amount).toString()
+        }
+      })
+      this.logger.log(`Fetched staking data [${stakes.length}] for hodler ${hodlerAddress}`)
+    }
+    this.logger.log(`Fetched staking data for ${Object.keys(stakingData).length} operators`)
+
+    return { stakingData, locksData }
   }
 
   public async getLastSnapshot(): Promise<RoundSnapshot | undefined> {
@@ -121,7 +152,7 @@ export class StakingRewardsService {
         })
 
         if (!result.Error) {
-          this.logger.log(`[${stamp}] Add-Scores ${Object.keys(scores).length}: ${messageId ?? 'no-message-id'}`)
+          this.logger.log(`[${stamp}] Add-Scores for ${Object.keys(scores).length} hodlers: ${messageId ?? 'no-message-id'}`)
 
           return true
         } else {
@@ -145,6 +176,7 @@ export class StakingRewardsService {
     }
 
     try {
+      this.logger.log(`Completing round for ${stamp}...`)
       const { messageId, result } = await sendAosMessage({
         processId: this.stakingRewardsProcessId,
         signer: this.signer as any, // NB: types, lol
@@ -152,6 +184,7 @@ export class StakingRewardsService {
           { name: 'Action', value: 'Complete-Round' },
           { name: 'Timestamp', value: stamp.toString() },
         ],
+        data: JSON.stringify({})
       })
 
       if (!result.Error) {

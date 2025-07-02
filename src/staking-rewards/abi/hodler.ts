@@ -206,6 +206,12 @@ export const hodlerABI = [
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
       }
     ],
     "name": "Locked",
@@ -263,6 +269,18 @@ export const hodlerABI = [
         "internalType": "bool",
         "name": "redeemed",
         "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "relayRewardAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "stakingRewardAmount",
+        "type": "uint256"
       }
     ],
     "name": "Rewarded",
@@ -413,6 +431,12 @@ export const hodlerABI = [
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
       }
     ],
     "name": "Unlocked",
@@ -707,6 +731,11 @@ export const hodlerABI = [
         "internalType": "string",
         "name": "_fingerprint",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
       }
     ],
     "name": "getLock",
@@ -736,6 +765,11 @@ export const hodlerABI = [
             "internalType": "string",
             "name": "fingerprint",
             "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "operator",
+            "type": "address"
           },
           {
             "internalType": "uint256",
@@ -951,6 +985,16 @@ export const hodlerABI = [
         "internalType": "bool",
         "name": "isSet",
         "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "claimedRelayRewards",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "claimedStakingRewards",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1005,6 +1049,11 @@ export const hodlerABI = [
         "internalType": "string",
         "name": "fingerprint",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
       }
     ],
     "name": "lock",
@@ -1117,7 +1166,12 @@ export const hodlerABI = [
       },
       {
         "internalType": "uint256",
-        "name": "_rewardAmount",
+        "name": "_relayRewardAllocation",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_stakingRewardAllocation",
         "type": "uint256"
       },
       {
@@ -1257,6 +1311,11 @@ export const hodlerABI = [
         "internalType": "string",
         "name": "fingerprint",
         "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "_operator",
+        "type": "address"
       }
     ],
     "name": "unlock",

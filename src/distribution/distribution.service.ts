@@ -17,6 +17,7 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { differenceInDays, startOfDay, subDays } from 'date-fns'
 import { BundlingService } from '../bundling/bundling.service'
+import { ethers, lock } from 'ethers'
 
 @Injectable()
 export class DistributionService {
@@ -125,9 +126,10 @@ export class DistributionService {
 
   public async getCurrentScores(stamp: number): Promise<ScoreData[]> {
     const relaysData = await this.fetchRelays()
-    const stakingData = await this.stakingRewardsService.getStakingData()
+    const { locksData, stakingData} = await this.stakingRewardsService.getHodlerData()
     const operatorRegistryState = await this.operatorRegistryService.getOperatorRegistryState()
     const verificationData = operatorRegistryState.VerifiedFingerprintsToOperatorAddresses
+    const isHardware = operatorRegistryState.VerifiedHardwareFingerprints
     
     const data: { [key: string]: {
       expected: number,
@@ -137,24 +139,27 @@ export class DistributionService {
 
     Object.keys(verificationData).forEach(fingerprint => {
       const verifiedAddress = verificationData[fingerprint]
-      
-      if (!data[verifiedAddress]) {
-        data[verifiedAddress] = {
-          expected: 0,
-          running: 0,
-          found: 0
+      if (verifiedAddress && verifiedAddress.length > 0) {
+        const pVA = ethers.getAddress(verifiedAddress)
+        if (!data[pVA]) {
+          data[pVA] = { expected: 0, running: 0, found: 0 }
         }
+        data[pVA].expected = data[pVA].expected + 1
       }
-
-      data[verifiedAddress].expected = data[verifiedAddress].expected + 1
     })
     
     relaysData.forEach(relay => {
       const verifiedAddress = verificationData[relay.fingerprint]
       if (verifiedAddress && verifiedAddress.length > 0) {
-        data[verifiedAddress].found = data[verifiedAddress].found + 1
-        if (relay.running && relay.consensus_weight > this.minHealthyConsensusWeight) {
-          data[verifiedAddress].running = data[verifiedAddress].running + 1
+        const pVA = ethers.getAddress(verifiedAddress)
+        data[pVA].found = data[pVA].found + 1
+
+        if ((
+              isHardware[relay.fingerprint] ||
+              (locksData[relay.fingerprint] && locksData[relay.fingerprint].includes(pVA)) 
+            ) && 
+            relay.running && relay.consensus_weight > this.minHealthyConsensusWeight) {
+          data[pVA].running = data[pVA].running + 1
         }
       } else {
         // this.logger.debug(`Found unverified relay ${relay.fingerprint}`)
@@ -165,15 +170,18 @@ export class DistributionService {
 
     Object.keys(data).forEach(operator => {
       const runningShare = Math.max(0, Math.min(data[operator].running / data[operator].expected, 1))
+      this.logger.debug(`Operator ${operator} has ${data[operator].expected} expected, ${data[operator].running} running and ${data[operator].found} found relays. Running share: ${runningShare}`)
       if (stakingData[operator]) {
         Object.keys(stakingData[operator]).forEach(hodler => {
           const staked = stakingData[operator][hodler] ?? '0'
-          scores.push({
-            Hodler: hodler,
-            Operator: operator,
-            Running: runningShare,
-            Staked: staked
-          })
+          if (staked !== '0') {
+            scores.push({
+              Hodler: hodler,
+              Operator: operator,
+              Running: runningShare,
+              Staked: staked
+            })
+          }
         })
       }
     })
@@ -181,10 +189,16 @@ export class DistributionService {
     const stakesSummary = {}
     Object.keys(stakingData).forEach(operator => {
       var stakePerOperator = BigInt(0)
-      Object.values(stakingData[operator]).forEach(stake => {
-        stakePerOperator += BigInt(stake)
+      Object.keys(stakingData[operator]).forEach(hodler => {
+        if (stakingData[operator][hodler]) {
+          stakePerOperator += BigInt(stakingData[operator][hodler])
+        }
       })
-      stakesSummary[operator] = stakePerOperator.toString()
+      this.logger.debug(`Operator ${operator} has total stake of ${stakePerOperator.toString()}`)
+      const staked = stakePerOperator.toString()
+      if (staked !== '0') {
+        stakesSummary[operator] = staked
+      }
     })
 
     const summary = {
@@ -192,7 +206,6 @@ export class DistributionService {
       Stakes: stakesSummary,
       Network: data
     }
-
     
     if (this.isLive !== 'true') {
       this.logger.warn(`NOT LIVE: Not storing staking/snapshot [${stamp}]`)
@@ -207,7 +220,7 @@ export class DistributionService {
         ]
 
         const { id: summary_tx } = await this.bundlingService.upload(
-          JSON.stringify(data), { tags }
+          JSON.stringify(summary), { tags }
         )
 
         this.logger.log(`Permanently stored staking/snaphot [${stamp}]: ${summary_tx}`)
@@ -222,7 +235,13 @@ export class DistributionService {
   public async addScores(stamp: number, scores: ScoreData[]): Promise<boolean> {
     const scoresForLua: AddScoresData = {}
     scores.forEach(score => {
-      scoresForLua[score.Hodler][score.Operator] = {
+      const hodlerNormalized = '0x' + score.Hodler.substring(2).toUpperCase()
+      const operatorNormalized = '0x' + score.Operator.substring(2).toUpperCase()
+      if (!scoresForLua[hodlerNormalized]) {
+        scoresForLua[hodlerNormalized] = {}
+      }
+
+      scoresForLua[hodlerNormalized][operatorNormalized] = {
         Staked: score.Staked,
         Running: score.Running
       }
