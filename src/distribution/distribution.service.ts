@@ -9,7 +9,6 @@ import { HttpService } from '@nestjs/axios'
 import { AxiosError } from 'axios'
 import { firstValueFrom, catchError } from 'rxjs'
 import { latLngToCell } from 'h3-js'
-import * as geoip from 'geoip-lite'
 import { RelayInfo } from './interfaces/8_3/relay-info'
 import { DetailsResponse } from './interfaces/8_3/details-response'
 import { OperatorRegistryService } from 'src/operator-registry/operator-registry.service'
@@ -45,9 +44,10 @@ export class DistributionService {
     private readonly bundlingService: BundlingService
   ) {
     this.isLive = config.get<string>('IS_LIVE', { infer: true })
-    geoip.startWatchingDataUpdate()
-    this.minHealthyConsensusWeight = config.get<number>('MIN_HEALTHY_CONSENSUS_WEIGHT', { infer: true })
-
+    this.minHealthyConsensusWeight = config.get<number>(
+      'MIN_HEALTHY_CONSENSUS_WEIGHT',
+      { infer: true }
+    )
     this.logger.log(
       `Initializing distribution service (IS_LIVE: ${this.isLive})`
     )
