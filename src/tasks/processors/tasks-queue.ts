@@ -1,5 +1,5 @@
 import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq'
-import { Inject, Logger } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 import { Job } from 'bullmq'
 import { TasksService } from '../tasks.service'
 
@@ -36,5 +36,10 @@ export class TasksQueue extends WorkerHost {
   @OnWorkerEvent('completed')
   onCompleted(job: Job<any, any, string>) {
     this.logger.debug(`Finished ${job.name} [${job.id}]`)
+  }
+
+  @OnWorkerEvent('failed')
+  onFailed(job: Job<any, any, string>) {
+    this.logger.error(`[alarm=failed-job-${job.name}] Failed ${job.name} [${job.id}]: ${job.failedReason}`)
   }
 }
