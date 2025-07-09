@@ -29,7 +29,7 @@ job "staking-rewards-controller-stage" {
       driver = "docker"
       config {
         network_mode = "host"
-        image = "ghcr.io/anyone-protocol/staking-rewards-controller:[[.deploy]]"
+        image = "ghcr.io/anyone-protocol/staking-rewards-controller:[[ .commit_sha ]]"
         force_pull = true
       }
 
@@ -46,7 +46,7 @@ job "staking-rewards-controller-stage" {
       env {
         BUMP=""
         IS_LIVE="true"
-        VERSION="[[.commit_sha]]"
+        VERSION="[[ .commit_sha ]]"
         BUNDLER_GATEWAY="https://ar.anyone.tech"
         BUNDLER_NODE="https://ar.anyone.tech/bundler"
         CPU_COUNT="1"
@@ -64,10 +64,10 @@ job "staking-rewards-controller-stage" {
 
       template {
         data = <<EOH
-        STAKING_REWARDS_PROCESS_ID="[[ consulKey "smart-contracts/stage/staking-rewards-address" ]]"
-        OPERATOR_REGISTRY_PROCESS_ID="[[ consulKey "smart-contracts/stage/operator-registry-address" ]]"
-        TOKEN_CONTRACT_ADDRESS="[[ consulKey "ator-token/sepolia/stage/address" ]]"
-        HODLER_CONTRACT_ADDRESS="[[ consulKey "hodler/sepolia/stage/address" ]]"
+        STAKING_REWARDS_PROCESS_ID="{{ key "smart-contracts/stage/staking-rewards-address" }}"
+        OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/stage/operator-registry-address" }}"
+        TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/sepolia/stage/address" }}"
+        HODLER_CONTRACT_ADDRESS="{{ key "hodler/sepolia/stage/address" }}"
         {{- range service "validator-stage-mongo" }}
           MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-stage-testnet"
         {{- end }}
