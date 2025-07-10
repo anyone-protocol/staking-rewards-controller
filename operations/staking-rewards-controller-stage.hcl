@@ -9,12 +9,11 @@ job "staking-rewards-controller-stage" {
   }
 
   group "staking-rewards-controller-stage-group" {
-    
     count = 1
 
     update {
       max_parallel     = 1
-      canary           = 2
+      canary           = 1
       min_healthy_time = "30s"
       healthy_deadline = "5m"
       auto_revert      = true
