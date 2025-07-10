@@ -14,8 +14,11 @@ job "staking-rewards-controller-stage" {
 
     update {
       max_parallel     = 1
+      canary           = 2
       min_healthy_time = "30s"
       healthy_deadline = "5m"
+      auto_revert      = true
+      auto_promote     = true
     }
 
     network {
