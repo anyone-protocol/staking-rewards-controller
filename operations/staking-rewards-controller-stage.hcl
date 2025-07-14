@@ -35,18 +35,7 @@ job "staking-rewards-controller-stage" {
         force_pull = true
       }
 
-      vault {
-        role = "any1-nomad-workloads-controller"
-      }
-
-      identity {
-        name = "vault_default"
-        aud  = ["any1-infra"]
-        ttl  = "1h"
-      }
-
       env {
-        BUMP=""
         IS_LIVE="true"
         VERSION="[[ .commit_sha ]]"
         BUNDLER_GATEWAY="https://ar.anyone.tech"
@@ -62,6 +51,18 @@ job "staking-rewards-controller-stage" {
         MIN_HEALTHY_CONSENSUS_WEIGHT="50"
         CU_URL="https://cu.anyone.permaweb.services"
         ANYONE_API_URL="https://api-stage.ec.anyone.tech"
+        ONIONOO_REQUEST_TIMEOUT="60000"
+        ONIONOO_REQUEST_MAX_REDIRECTS="3"
+      }
+
+      vault {
+        role = "any1-nomad-workloads-controller"
+      }
+
+      identity {
+        name = "vault_default"
+        aud  = ["any1-infra"]
+        ttl  = "1h"
       }
 
       template {
@@ -71,18 +72,26 @@ job "staking-rewards-controller-stage" {
         TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/sepolia/stage/address" }}"
         HODLER_CONTRACT_ADDRESS="{{ key "hodler/sepolia/stage/address" }}"
         {{- range service "validator-stage-mongo" }}
-          MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-stage-testnet"
+        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-stage-testnet"
         {{- end }}
-        {{- range service "staking-rewards-controller-redis-stage" }}
-          REDIS_HOSTNAME="{{ .Address }}"
-          REDIS_PORT="{{ .Port }}"
-        {{- end }}
-
         {{- range service "onionoo-war-live" }}
-          ONIONOO_DETAILS_URI="http://{{ .Address }}:{{ .Port }}/details"
+        ONIONOO_DETAILS_URI="http://{{ .Address }}:{{ .Port }}/details"
         {{- end }}
-        ONIONOO_REQUEST_TIMEOUT="60000"
-        ONIONOO_REQUEST_MAX_REDIRECTS="3"
+        {{- range service "operator-checks-stage-redis-master" }}
+        REDIS_MASTER_NAME="{{ .Name }}"
+        {{- end }}
+        {{- range service "operator-checks-stage-sentinel-1" }}
+        REDIS_SENTINEL_1_HOST={{ .Address }}
+        REDIS_SENTINEL_1_PORT={{ .Port }}
+        {{- end }}
+        {{- range service "operator-checks-stage-sentinel-2" }}
+        REDIS_SENTINEL_2_HOST={{ .Address }}
+        REDIS_SENTINEL_2_PORT={{ .Port }}
+        {{- end }}
+        {{- range service "operator-checks-stage-sentinel-3" }}
+        REDIS_SENTINEL_3_HOST={{ .Address }}
+        REDIS_SENTINEL_3_PORT={{ .Port }}
+        {{- end }}
         EOH
         destination = "local/config.env"
         env         = true
@@ -92,18 +101,18 @@ job "staking-rewards-controller-stage" {
         data = <<EOH
         {{ $allocIndex := env "NOMAD_ALLOC_INDEX" }}
         {{ with secret "kv/stage-protocol/staking-rewards-controller-stage" }}
-          STAKING_REWARDS_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
-          REWARDS_POOL_KEY="{{.Data.data.REWARDS_POOL_KEY}}"
-          BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
-          BUNDLER_CONTROLLER_KEY="{{.Data.data.BUNDLER_CONTROLLER_KEY}}"
-          CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
-          EVM_JSON_RPC="https://sepolia.infura.io/v3/{{ index .Data.data (print `INFURA_SEPOLIA_API_KEY_` $allocIndex) }}"
+        STAKING_REWARDS_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
+        REWARDS_POOL_KEY="{{.Data.data.REWARDS_POOL_KEY}}"
+        BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
+        BUNDLER_CONTROLLER_KEY="{{.Data.data.BUNDLER_CONTROLLER_KEY}}"
+        CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
+        EVM_JSON_RPC="https://sepolia.infura.io/v3/{{ index .Data.data (print `INFURA_SEPOLIA_API_KEY_` $allocIndex) }}"
         {{ end }}
         EOH
         destination = "secrets/keys.env"
         env         = true
       }
-      
+
       resources {
         cpu    = 2048
         memory = 2048
