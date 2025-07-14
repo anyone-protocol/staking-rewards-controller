@@ -38,6 +38,8 @@ job "staking-rewards-controller-stage" {
       env {
         IS_LIVE="true"
         VERSION="[[ .commit_sha ]]"
+        REDIS_MODE="sentinel"
+        REDIS_MASTER_NAME="operator-checks-stage-redis-master"
         BUNDLER_GATEWAY="https://ar.anyone.tech"
         BUNDLER_NODE="https://ar.anyone.tech/bundler"
         CPU_COUNT="1"
