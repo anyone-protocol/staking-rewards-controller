@@ -79,18 +79,18 @@ job "staking-rewards-controller-stage" {
         {{- range service "onionoo-war-live" }}
         ONIONOO_DETAILS_URI="http://{{ .Address }}:{{ .Port }}/details"
         {{- end }}
-        {{- range service "operator-checks-stage-redis-master" }}
+        {{- range service "staking-rewards-controller-stage-redis-master" }}
         REDIS_MASTER_NAME="{{ .Name }}"
         {{- end }}
-        {{- range service "operator-checks-stage-sentinel-1" }}
+        {{- range service "staking-rewards-controller-stage-sentinel-1" }}
         REDIS_SENTINEL_1_HOST={{ .Address }}
         REDIS_SENTINEL_1_PORT={{ .Port }}
         {{- end }}
-        {{- range service "operator-checks-stage-sentinel-2" }}
+        {{- range service "staking-rewards-controller-stage-sentinel-2" }}
         REDIS_SENTINEL_2_HOST={{ .Address }}
         REDIS_SENTINEL_2_PORT={{ .Port }}
         {{- end }}
-        {{- range service "operator-checks-stage-sentinel-3" }}
+        {{- range service "staking-rewards-controller-stage-sentinel-3" }}
         REDIS_SENTINEL_3_HOST={{ .Address }}
         REDIS_SENTINEL_3_PORT={{ .Port }}
         {{- end }}
