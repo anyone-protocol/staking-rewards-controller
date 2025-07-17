@@ -52,7 +52,6 @@ job "staking-rewards-controller-stage" {
         NO_COLOR="1"
         MIN_HEALTHY_CONSENSUS_WEIGHT="50"
         CU_URL="https://cu.anyone.permaweb.services"
-        ANYONE_API_URL="https://api-stage.ec.anyone.tech"
         ONIONOO_REQUEST_TIMEOUT="60000"
         ONIONOO_REQUEST_MAX_REDIRECTS="3"
       }
@@ -95,7 +94,7 @@ job "staking-rewards-controller-stage" {
         REDIS_SENTINEL_3_PORT={{ .Port }}
         {{- end }}
         {{- range service "api-service-stage" }}
-        ANYONE_API_URL="{{ .Address }}:{{ .Port }}"
+        ANYONE_API_URL="http://{{ .Address }}:{{ .Port }}"
         {{- end }}
         EOH
         destination = "local/config.env"
