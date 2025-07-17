@@ -40,8 +40,6 @@ job "staking-rewards-controller-stage" {
         VERSION="[[ .commit_sha ]]"
         REDIS_MODE="sentinel"
         REDIS_MASTER_NAME="operator-checks-stage-redis-master"
-        BUNDLER_GATEWAY="https://ar.anyone.tech"
-        BUNDLER_NODE="https://ar.anyone.tech/bundler"
         CPU_COUNT="1"
         CONSUL_HOST="${NOMAD_IP_http}"
         CONSUL_PORT="8500"
@@ -95,6 +93,10 @@ job "staking-rewards-controller-stage" {
         {{- end }}
         {{- range service "api-service-stage" }}
         ANYONE_API_URL="http://{{ .Address }}:{{ .Port }}"
+        {{- end }}
+        {{- range service "ario-any1-envoy" }}
+        BUNDLER_GATEWAY="http://{{ .Address }}:{{ .Port }}"
+        BUNDLER_NODE="http://{{ .Address }}:{{ .Port }}/bundler"
         {{- end }}
         EOH
         destination = "local/config.env"
