@@ -116,7 +116,12 @@ export class TasksService implements OnApplicationBootstrap {
           `Bootstrapping Tasks service with a new distribution queue`
         )
 
-        return this.queueDistribution()
+        this.queueDistribution().catch(error => {
+          this.logger.error(
+            `Failed to queue distribution during bootstrap: ${error.message}`,
+            error.stack
+          )
+        })
       }
     } else {
       this.logger.debug(
@@ -139,7 +144,10 @@ export class TasksService implements OnApplicationBootstrap {
         await this.distributionQueue.add('start-distribution', now, TasksService.jobOpts)
         await this.taskServiceDataModel.create({ startedAt: now })
       } catch (error) {
-        this.logger.error(`Failed adding distribution job to queue: ${error.message}`, error.stack)
+        this.logger.error(
+          `Failed adding distribution job to queue: ${error.message}`,
+          error.stack
+        )
       }
     }
 
