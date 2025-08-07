@@ -58,11 +58,7 @@ job "staking-rewards-controller-stage" {
         role = "any1-nomad-workloads-controller"
       }
 
-      identity {
-        name = "vault_default"
-        aud  = ["any1-infra"]
-        ttl  = "1h"
-      }
+      consul {}
 
       template {
         data = <<EOH
