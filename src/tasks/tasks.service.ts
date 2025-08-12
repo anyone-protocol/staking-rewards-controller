@@ -82,7 +82,12 @@ export class TasksService implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap(): Promise<void> {
-    if (this.cluster.isLocalLeader()) {
+    this.logger.log('Bootstrapping Tasks Service')
+
+    if (this.cluster.isTheOne()) {
+      this.logger.log(
+        `I am the leader, checking queue cleanup & immediate queue start`
+      )
       if (this.doClean == 'true') {
         this.logger.log(
           'Cleaning up tasks queue, distribution queue, and task service ' +
