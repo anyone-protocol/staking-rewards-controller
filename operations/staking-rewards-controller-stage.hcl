@@ -9,7 +9,7 @@ job "staking-rewards-controller-stage" {
   }
 
   group "staking-rewards-controller-stage-group" {
-    count = 1
+    count = 2
 
     update {
       max_parallel     = 1
@@ -50,9 +50,9 @@ job "staking-rewards-controller-stage" {
         ONIONOO_REQUEST_MAX_REDIRECTS="3"
         IS_LOCAL_LEADER="true"
         CPU_COUNT="1"
-        # CONSUL_HOST="${NOMAD_IP_http}"
-        # CONSUL_PORT="8500"
-        # CONSUL_SERVICE_NAME="staking-rewards-controller-stage"
+        CONSUL_HOST="${NOMAD_IP_http}"
+        CONSUL_PORT="8500"
+        CONSUL_SERVICE_NAME="staking-rewards-controller-stage"
       }
 
       vault {
