@@ -88,7 +88,7 @@ job "staking-rewards-controller-stage" {
         {{- range service "api-service-stage" }}
         ANYONE_API_URL="http://{{ .Address }}:{{ .Port }}"
         {{- end }}
-        {{- range service "ario-any1-envoy" }}
+        {{- range service "ario-bundler-any1-upload" }}
         BUNDLER_GATEWAY="http://{{ .Address }}:{{ .Port }}"
         BUNDLER_NODE="http://{{ .Address }}:{{ .Port }}/bundler"
         {{- end }}
