@@ -1,14 +1,14 @@
-job "staking-rewards-controller-stage" {
+job "staking-rewards-controller-live" {
   datacenters = ["ator-fin"]
   type = "service"
-  namespace = "stage-protocol"
+  namespace = "live-protocol"
 
   constraint {
     attribute = "${meta.pool}"
-    value = "stage"
+    value = "live-protocol"
   }
 
-  group "staking-rewards-controller-stage-group" {
+  group "staking-rewards-controller-live-group" {
     count = 2
 
     update {
@@ -23,7 +23,7 @@ job "staking-rewards-controller-stage" {
       }
     }
 
-    task "staking-rewards-controller-stage-service" {
+    task "staking-rewards-controller-live-service" {
       kill_timeout = "30s"
       driver = "docker"
       config {
@@ -36,7 +36,7 @@ job "staking-rewards-controller-stage" {
         IS_LIVE="true"
         VERSION="[[ .commit_sha ]]"
         REDIS_MODE="sentinel"
-        REDIS_MASTER_NAME="operator-checks-stage-redis-master"
+        REDIS_MASTER_NAME="operator-checks-live-redis-master"
         ROUND_PERIOD_SECONDS="900"
         DO_CLEAN="true"
         PORT="${NOMAD_PORT_http}"
@@ -49,7 +49,7 @@ job "staking-rewards-controller-stage" {
         CPU_COUNT="1"
         CONSUL_HOST="${NOMAD_IP_http}"
         CONSUL_PORT="8500"
-        CONSUL_SERVICE_NAME="staking-rewards-controller-stage"
+        CONSUL_SERVICE_NAME="staking-rewards-controller-live"
         BUNDLER_GATEWAY="https://ar.anyone.tech"
         BUNDLER_NODE="https://ar.anyone.tech/bundler"
       }
@@ -62,32 +62,32 @@ job "staking-rewards-controller-stage" {
 
       template {
         data = <<EOH
-        STAKING_REWARDS_PROCESS_ID="{{ key "smart-contracts/stage/staking-rewards-address" }}"
-        OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/stage/operator-registry-address" }}"
-        TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/sepolia/stage/address" }}"
-        HODLER_CONTRACT_ADDRESS="{{ key "hodler/sepolia/stage/address" }}"
-        {{- range service "validator-stage-mongo" }}
-        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-stage2"
+        STAKING_REWARDS_PROCESS_ID="{{ key "smart-contracts/live/staking-rewards-address" }}"
+        OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/live/operator-registry-address" }}"
+        TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/sepolia/live/address" }}"
+        HODLER_CONTRACT_ADDRESS="{{ key "hodler/sepolia/live/address" }}"
+        {{- range service "validator-live-mongo" }}
+        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-live2"
         {{- end }}
         {{- range service "onionoo-war-live" }}
         ONIONOO_DETAILS_URI="http://{{ .Address }}:{{ .Port }}/details"
         {{- end }}
-        {{- range service "staking-rewards-controller-stage-redis-master" }}
+        {{- range service "staking-rewards-controller-live-redis-master" }}
         REDIS_MASTER_NAME="{{ .Name }}"
         {{- end }}
-        {{- range service "staking-rewards-controller-stage-sentinel-1" }}
+        {{- range service "staking-rewards-controller-live-sentinel-1" }}
         REDIS_SENTINEL_1_HOST={{ .Address }}
         REDIS_SENTINEL_1_PORT={{ .Port }}
         {{- end }}
-        {{- range service "staking-rewards-controller-stage-sentinel-2" }}
+        {{- range service "staking-rewards-controller-live-sentinel-2" }}
         REDIS_SENTINEL_2_HOST={{ .Address }}
         REDIS_SENTINEL_2_PORT={{ .Port }}
         {{- end }}
-        {{- range service "staking-rewards-controller-stage-sentinel-3" }}
+        {{- range service "staking-rewards-controller-live-sentinel-3" }}
         REDIS_SENTINEL_3_HOST={{ .Address }}
         REDIS_SENTINEL_3_PORT={{ .Port }}
         {{- end }}
-        {{- range service "api-service-stage" }}
+        {{- range service "api-service-live" }}
         ANYONE_API_URL="http://{{ .Address }}:{{ .Port }}"
         {{- end }}
         EOH
@@ -98,7 +98,7 @@ job "staking-rewards-controller-stage" {
       template {
         data = <<EOH
         {{ $allocIndex := env "NOMAD_ALLOC_INDEX" }}
-        {{ with secret "kv/stage-protocol/staking-rewards-controller-stage" }}
+        {{ with secret "kv/live-protocol/staking-rewards-controller-live" }}
         STAKING_REWARDS_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
         BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
         BUNDLER_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
@@ -116,11 +116,11 @@ job "staking-rewards-controller-stage" {
       }
 
       service {
-        name = "staking-rewards-controller-stage"
+        name = "staking-rewards-controller-live"
         port = "http"
         tags = ["logging"]
         check {
-          name     = "stage staking-rewards-controller health check"
+          name     = "live staking-rewards-controller health check"
           type     = "http"
           path     = "/health"
           interval = "5s"
