@@ -43,9 +43,7 @@ job "staking-rewards-controller-live" {
         NO_COLOR="1"
         MIN_HEALTHY_CONSENSUS_WEIGHT="50"
         
-        CU_URL="https://cu.ardrive.io"
-        # Switch back when rdy
-        # CU_URL="https://cu.anyone.permaweb.services"
+        CU_URL="https://cu.anyone.permaweb.services"
         ONIONOO_REQUEST_TIMEOUT="60000"
         ONIONOO_REQUEST_MAX_REDIRECTS="3"
         IS_LOCAL_LEADER="true"
