@@ -106,7 +106,7 @@ export class StakingRewardsService {
           stakingData[operatorAddress][hodlerAddress] = BigInt(stake.amount).toString()
         }
       })
-      this.logger.log(`Fetched staking data [${stakes.length}] for hodler ${hodlerAddress}`)
+      this.logger.debug(`Fetched staking data [${stakes.length}] for hodler ${hodlerAddress}`)
     }
     this.logger.log(`Fetched staking data for ${Object.keys(stakingData).length} operators`)
 
