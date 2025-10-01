@@ -54,26 +54,37 @@ export class DistributionService {
   }
 
   public groupScoreJobs(data: ScoreData[]): ScoreData[][] {
-    const result = data.reduce<ScoreData[][]>((curr, score): ScoreData[][] => {
-      if (curr.length == 0) {
-        curr.push([score])
-      } else {
-        if (curr[curr.length - 1].length < DistributionService.scoresPerBatch) {
-          const last = curr.pop()
-          if (last != undefined) {
-            last.push(score)
-            curr.push(last)
-          } else {
-            this.logger.error('Last element not found, this should not happen')
-          }
-        } else {
-          curr.push([score])
-        }
-      }
-      return curr
-    }, [])
+    const scoresByHodler = new Map<string, ScoreData[]>()
+    for (const score of data) {
+      const hodlerScores = scoresByHodler.get(score.Hodler) || []
+      hodlerScores.push(score)
+      scoresByHodler.set(score.Hodler, hodlerScores)
+    }
 
-    this.logger.debug(`Created ${result.length} groups out of ${data.length}`)
+    const hodlerGroups = Array.from(scoresByHodler.values())
+
+    const result: ScoreData[][] = []
+    let currentBatch: ScoreData[] = []
+
+    for (const hodlerScores of hodlerGroups) {
+      if (
+        currentBatch.length > 0 &&
+        currentBatch.length + hodlerScores.length > DistributionService.scoresPerBatch
+      ) {
+        result.push(currentBatch)
+        currentBatch = []
+      }
+
+      currentBatch.push(...hodlerScores)
+    }
+
+    if (currentBatch.length > 0) {
+      result.push(currentBatch)
+    }
+
+    this.logger.debug(
+      `Created ${result.length} groups out of ${data.length} scores from ${hodlerGroups.length} hodlers`
+    )
 
     return result
   }
