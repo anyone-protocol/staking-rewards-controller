@@ -38,6 +38,10 @@ export class OperatorRegistryService {
       processId: this.operatorRegistryProcessId,
       tags: [{ name: 'Action', value: 'View-State' }],
     })
+    if (result.Error) {
+      this.logger.error(`Failed fetching operator registry state: ${result.Error}`)
+      return {} as OperatorRegistryState
+    }
     const state = JSON.parse(result.Messages[0].Data)
 
     for (const prop in state) {
