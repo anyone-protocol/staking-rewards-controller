@@ -82,9 +82,10 @@ export class DistributionService {
       result.push(currentBatch)
     }
 
-    this.logger.debug(
+    this.logger.log(
       `Created ${result.length} groups out of ${data.length} scores from ${hodlerGroups.length} hodlers`
     )
+    this.logger.log(result)
 
     return result
   }
