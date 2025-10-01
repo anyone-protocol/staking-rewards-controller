@@ -139,10 +139,6 @@ export class StakingRewardsService {
   public async addScores(stamp: number, scores: AddScoresData): Promise<boolean> {
     if (this.isLive === 'true') {
       try {
-        this.logger.log(`Sending Add-Scores for ${stamp}: ${JSON.stringify({
-            Scores: scores,
-          })}`)
-
         const { messageId, result } = await sendAosMessage({
           processId: this.stakingRewardsProcessId,
           signer: this.signer as any, // NB: types, lol

@@ -83,9 +83,8 @@ export class DistributionService {
     }
 
     this.logger.log(
-      `Created ${result.length} groups out of ${data.length} scores from ${hodlerGroups.length} hodlers`
+      `Created ${result.length} groups out of ${data.length} scores for ${hodlerGroups.length} hodlers`
     )
-    this.logger.log(result)
 
     return result
   }
