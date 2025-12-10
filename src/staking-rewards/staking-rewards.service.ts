@@ -82,10 +82,12 @@ export class StakingRewardsService {
 
   public async getHodlerData(): Promise<{
     locksData: { [key: string]: string[] },
-    stakingData: { [key: string]: { [key: string]: string }}
+    stakingData: { [key: string]: { [key: string]: string }},
+    locksCount: { [key: string]: { [key: string]: number }}
   }> {
     const locksData = {}
     const stakingData = {}
+    const locksCount = {}
 
     const keys = await this.hodlerContract.getHodlerKeys()
     for (const key of keys) {
@@ -100,6 +102,10 @@ export class StakingRewardsService {
         if (!locksData[lock.fingerprint].includes(operatorAddress)) {
           locksData[lock.fingerprint].push(operatorAddress)
         }
+        if (!locksCount[operatorAddress]) {
+          locksCount[operatorAddress] = {}
+        }
+        locksCount[operatorAddress][lock.fingerprint] = (locksCount[operatorAddress][lock.fingerprint] || 0) + 1
       })
 
       const stakes: { operator: string, amount: string }[] = await this.hodlerContract.getStakes(hodlerAddress)
@@ -116,7 +122,7 @@ export class StakingRewardsService {
     }
     this.logger.log(`Fetched staking data for ${Object.keys(stakingData).length} operators`)
 
-    return { stakingData, locksData }
+    return { stakingData, locksData, locksCount }
   }
 
   public async getLastSnapshot(): Promise<RoundSnapshot | undefined> {

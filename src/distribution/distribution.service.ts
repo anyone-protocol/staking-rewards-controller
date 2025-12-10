@@ -136,7 +136,7 @@ export class DistributionService {
 
   public async getCurrentScores(stamp: number): Promise<ScoreData[]> {
     const relaysData = await this.fetchRelays()
-    const { locksData, stakingData} = await this.stakingRewardsService.getHodlerData()
+    const { locksData, stakingData, locksCount } = await this.stakingRewardsService.getHodlerData()
     const operatorRegistryState = await this.operatorRegistryService.getOperatorRegistryState()
     const verificationData = operatorRegistryState.VerifiedFingerprintsToOperatorAddresses
     const isHardware = operatorRegistryState.VerifiedHardwareFingerprints
@@ -214,7 +214,8 @@ export class DistributionService {
     const summary = {
       Timestamp: stamp,
       Stakes: stakesSummary,
-      Network: data
+      Network: data,
+      Locks: locksCount
     }
     
     if (this.isLive !== 'true') {
