@@ -68,7 +68,7 @@ job "staking-rewards-controller-live" {
         TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/mainnet/live/address" }}"
         HODLER_CONTRACT_ADDRESS="{{ key "hodler/mainnet/live/address" }}"
         {{- range service "validator-live-mongo" }}
-        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-live2"
+        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-mainnet"
         {{- end }}
         {{- range service "onionoo-war-live" }}
         ONIONOO_DETAILS_URI="http://{{ .Address }}:{{ .Port }}/details"
