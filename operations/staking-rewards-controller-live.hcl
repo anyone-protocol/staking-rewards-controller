@@ -104,7 +104,7 @@ job "staking-rewards-controller-live" {
         BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
         BUNDLER_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
         CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
-        EVM_JSON_RPC="https://mainnet.infura.io/v3/{{ index .Data.data (print `INFURA_MAINNET_API_KEY_` $allocIndex) }}"
+        EVM_JSON_RPC="https://mainnet.infura.io/v3/{{ index .Data.data (print `INFURA_API_KEY_` $allocIndex) }}"
         {{ end }}
         EOH
         destination = "secrets/keys.env"
