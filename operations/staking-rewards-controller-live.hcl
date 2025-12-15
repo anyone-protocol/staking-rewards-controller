@@ -65,8 +65,8 @@ job "staking-rewards-controller-live" {
         data = <<EOH
         STAKING_REWARDS_PROCESS_ID="{{ key "smart-contracts/live/staking-rewards-address" }}"
         OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/live/operator-registry-address" }}"
-        TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/sepolia/live/address" }}"
-        HODLER_CONTRACT_ADDRESS="{{ key "hodler/sepolia/live/address" }}"
+        TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/mainnet/live/address" }}"
+        HODLER_CONTRACT_ADDRESS="{{ key "hodler/mainnet/live/address" }}"
         {{- range service "validator-live-mongo" }}
         MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-live2"
         {{- end }}
@@ -104,7 +104,7 @@ job "staking-rewards-controller-live" {
         BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
         BUNDLER_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
         CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
-        EVM_JSON_RPC="https://sepolia.infura.io/v3/{{ index .Data.data (print `INFURA_SEPOLIA_API_KEY_` $allocIndex) }}"
+        EVM_JSON_RPC="https://mainnet.infura.io/v3/{{ index .Data.data (print `INFURA_MAINNET_API_KEY_` $allocIndex) }}"
         {{ end }}
         EOH
         destination = "secrets/keys.env"
