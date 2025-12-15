@@ -65,10 +65,10 @@ job "staking-rewards-controller-live" {
         data = <<EOH
         STAKING_REWARDS_PROCESS_ID="{{ key "smart-contracts/live/staking-rewards-address" }}"
         OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/live/operator-registry-address" }}"
-        TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/mainnet/live/address" }}"
-        HODLER_CONTRACT_ADDRESS="{{ key "hodler/mainnet/live/address" }}"
+        TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/ethereum/live/address" }}"
+        HODLER_CONTRACT_ADDRESS="{{ key "hodler/ethereum/live/address" }}"
         {{- range service "validator-live-mongo" }}
-        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-mainnet"
+        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-ethereum"
         {{- end }}
         {{- range service "onionoo-war-live" }}
         ONIONOO_DETAILS_URI="http://{{ .Address }}:{{ .Port }}/details"
