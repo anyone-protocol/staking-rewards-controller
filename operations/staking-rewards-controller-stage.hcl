@@ -50,9 +50,9 @@ job "staking-rewards-controller-stage" {
         CONSUL_HOST="${NOMAD_IP_http}"
         CONSUL_PORT="8500"
         CONSUL_SERVICE_NAME="staking-rewards-controller-stage"
-        # BUNDLER_GATEWAY="https://ar.anyone.tech"
-        BUNDLER_GATEWAY="https://upload.ardrive.io"
-        BUNDLER_NODE="https://ar.anyone.tech/bundler"
+        BUNDLER_GATEWAY="https://ar.anyone.tech"
+        BUNDLER_NODE="https://upload.ardrive.io"
+        # BUNDLER_NODE="https://ar.anyone.tech/bundler"
       }
 
       vault {
