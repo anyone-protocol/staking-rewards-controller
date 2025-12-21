@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { ScoreData } from './schemas/score-data'
 import { ConfigService } from '@nestjs/config'
 import _ from 'lodash'
@@ -12,11 +12,8 @@ import { RelayInfo } from './interfaces/8_3/relay-info'
 import { DetailsResponse } from './interfaces/8_3/details-response'
 import { OperatorRegistryService } from 'src/operator-registry/operator-registry.service'
 import { TasksService } from 'src/tasks/tasks.service'
-import { InjectModel } from '@nestjs/mongoose'
-import { Model } from 'mongoose'
-import { differenceInDays, startOfDay, subDays } from 'date-fns'
 import { BundlingService } from '../bundling/bundling.service'
-import { ethers, lock } from 'ethers'
+import { ethers } from 'ethers'
 
 @Injectable()
 export class DistributionService {
@@ -140,7 +137,7 @@ export class DistributionService {
     const operatorRegistryState = await this.operatorRegistryService.getOperatorRegistryState()
     const verificationData = operatorRegistryState.VerifiedFingerprintsToOperatorAddresses
     const isHardware = operatorRegistryState.VerifiedHardwareFingerprints
-    
+
     const data: { [key: string]: {
       expected: number,
       running: number,
@@ -157,7 +154,7 @@ export class DistributionService {
         data[pVA].expected = data[pVA].expected + 1
       }
     })
-    
+
     relaysData.forEach(relay => {
       const verifiedAddress = verificationData[relay.fingerprint]
       if (verifiedAddress && verifiedAddress.length > 0) {
@@ -166,8 +163,8 @@ export class DistributionService {
 
         if ((
               isHardware[relay.fingerprint] ||
-              (locksData[relay.fingerprint] && locksData[relay.fingerprint].includes(pVA)) 
-            ) && 
+              (locksData[relay.fingerprint] && locksData[relay.fingerprint].includes(pVA))
+            ) &&
             relay.running && relay.consensus_weight > this.minHealthyConsensusWeight) {
           data[pVA].running = data[pVA].running + 1
         }
@@ -217,7 +214,7 @@ export class DistributionService {
       Network: data,
       Locks: locksCount
     }
-    
+
     if (this.isLive !== 'true') {
       this.logger.warn(`NOT LIVE: Not storing staking/snapshot [${stamp}]`)
     } else {
