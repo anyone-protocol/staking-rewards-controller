@@ -45,9 +45,9 @@ resumes correctly rather than starting a duplicate round.
                          ┌──────────────────────────────────────────────┐
                          │          staking-rewards-controller          │
                          │                  (NestJS)                    │
-   Onionoo ──details──▶ │  DistributionService ── scoring & batching   │
+   Onionoo ──details──▶  │  DistributionService ── scoring & batching   │
    HODLER (EVM) ─stake─  │  StakingRewardsService ── ethers + AO msgs   │  ──Add-Scores──▶  AO staking rewards process
-   Operator Registry ──▶│  OperatorRegistryService ── AO dryrun        │  ──Complete-Round▶ AO staking rewards process  
+   Operator Registry ──▶ │  OperatorRegistryService ── AO dryrun        │  ──Complete-Round▶ AO staking rewards process  
    (AO)                  │  BundlingService ── ArDrive Turbo            │                    
                          │  TasksService + BullMQ processors            │  ──snapshot/summary▶ Arweave
                          │  ClusterService ── Consul leader election    │
