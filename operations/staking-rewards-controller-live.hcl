@@ -92,9 +92,6 @@ job "staking-rewards-controller-live" {
         REDIS_SENTINEL_3_HOST={{ .Address }}
         REDIS_SENTINEL_3_PORT={{ .Port }}
         {{- end }}
-        {{- range service "api-service-live" }}
-        ANYONE_API_URL="http://{{ .Address }}:{{ .Port }}"
-        {{- end }}
         EOH
         destination = "local/config.env"
         env         = true

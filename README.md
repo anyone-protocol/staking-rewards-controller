@@ -149,7 +149,6 @@ addresses, Vault for secrets.
 | --- | --- |
 | `ONIONOO_DETAILS_URI` | Onionoo `/details` endpoint for relay data. **Required for scoring.** |
 | `DETAILS_URI_AUTH` | Optional `Authorization` header value for the details endpoint. |
-| `ANYONE_API_URL` | ANYONE API base URL. |
 
 ### EVM / HODLER contract
 
