@@ -165,7 +165,7 @@ addresses, Vault for secrets.
 | --- | --- |
 | `STAKING_REWARDS_PROCESS_ID` | AO process ID for the staking rewards process (`Add-Scores`, `Complete-Round`, `Last-Snapshot`). |
 | `OPERATOR_REGISTRY_PROCESS_ID` | AO process ID for the operator registry (`View-State`). |
-| `CU_URL` | AO Compute Unit URL used by `@permaweb/aoconnect`. |
+| `HB_URL` | Our HyperBEAM node, e.g. `https://hb.anyone.tech`. No default — the service refuses to start without it. |
 
 ### Arweave bundling (ArDrive Turbo)
 

@@ -134,9 +134,8 @@ export class DistributionService {
   public async getCurrentScores(stamp: number): Promise<ScoreData[]> {
     const relaysData = await this.fetchRelays()
     const { locksData, stakingData, locksCount } = await this.stakingRewardsService.getHodlerData()
-    const operatorRegistryState = await this.operatorRegistryService.getOperatorRegistryState()
-    const verificationData = operatorRegistryState.VerifiedFingerprintsToOperatorAddresses
-    const isHardware = operatorRegistryState.VerifiedHardwareFingerprints
+    const { verified: verificationData, hardware: isHardware } =
+      await this.operatorRegistryService.getOperatorRegistryScoring()
 
     const data: { [key: string]: {
       expected: number,

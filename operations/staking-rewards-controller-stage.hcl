@@ -42,7 +42,10 @@ job "staking-rewards-controller-stage" {
         PORT="${NOMAD_PORT_http}"
         NO_COLOR="1"
         MIN_HEALTHY_CONSENSUS_WEIGHT="50"
-        CU_URL="https://cu-stage.anyone.tech"
+        # Our own HyperBEAM node — replaces CU_URL (D17). The edge whitelists
+        # `/~meta@1.0` and `^/{contract-pid}`, covering both the `~process@1.0/now/...`
+        # reads and the `~process@1.0/push` writes.
+        HB_URL="https://hb-stage.anyone.tech"
         ONIONOO_REQUEST_TIMEOUT="60000"
         ONIONOO_REQUEST_MAX_REDIRECTS="3"
         IS_LOCAL_LEADER="true"
