@@ -53,9 +53,9 @@ job "staking-rewards-controller-stage" {
         CONSUL_HOST="${NOMAD_IP_http}"
         CONSUL_PORT="8500"
         CONSUL_SERVICE_NAME="staking-rewards-controller-stage"
-        BUNDLER_GATEWAY="https://ar.anyone.tech"
-        BUNDLER_NODE="https://upload.ardrive.io"
-        # BUNDLER_NODE="https://ar.anyone.tech/bundler"
+        # Our own node once /~bundler@1.0/tx is edge-allowed + the signer is faff-allow-listed:
+        #   BUNDLER_NODE="https://hb.anyone.tech"
+        BUNDLER_NODE="https://up.arweave.net"
       }
 
       vault {
@@ -101,7 +101,6 @@ job "staking-rewards-controller-stage" {
         {{ $allocIndex := env "NOMAD_ALLOC_INDEX" }}
         {{ with secret "kv/stage-protocol/staking-rewards-controller-stage" }}
         STAKING_REWARDS_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
-        BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
         BUNDLER_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
         CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
         EVM_JSON_RPC="https://sepolia.infura.io/v3/{{ index .Data.data (print `INFURA_API_KEY_` $allocIndex) }}"
