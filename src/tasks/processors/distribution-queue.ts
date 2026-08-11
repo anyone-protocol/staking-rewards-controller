@@ -23,7 +23,7 @@ export class DistributionQueue extends WorkerHost {
   }
 
   async process(job: Job<any, any, string>): Promise<boolean | AddScoresResult | undefined> {
-    this.logger.debug(`Dequeueing ${job.name} [${job.id}]`)
+    this.logger.log(`Dequeueing ${job.name} [${job.id}]`)
 
     switch (job.name) {
       case DistributionQueue.JOB_START_DISTRIBUTION:
@@ -45,7 +45,7 @@ export class DistributionQueue extends WorkerHost {
 
   @OnWorkerEvent('completed')
   onCompleted(job: Job<any, any, string>) {
-    this.logger.debug(`Finished ${job.name} [${job.id}]`)
+    this.logger.log(`Finished ${job.name} [${job.id}]`)
   }
 
   @OnWorkerEvent('failed')
