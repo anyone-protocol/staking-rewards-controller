@@ -9,7 +9,7 @@ import {
   nodeUrlFromEnv
 } from '@anyone-protocol/ao-client'
 import { ConfigService } from '@nestjs/config'
-import { AddScoresData } from 'src/distribution/dto/add-scores'
+import { AddScoresData, NetworkCounts } from 'src/distribution/dto/add-scores'
 import RoundSnapshot from 'src/distribution/dto/round-snapshot'
 import { hodlerABI } from './abi/hodler'
 
@@ -173,7 +173,11 @@ export class StakingRewardsService {
     }
   }
 
-  public async addScores(stamp: number, scores: AddScoresData): Promise<boolean> {
+  public async addScores(
+    stamp: number,
+    scores: AddScoresData,
+    network?: NetworkCounts
+  ): Promise<boolean> {
     if (this.isLive !== 'true') {
       this.logger.warn(`NOT LIVE: Not adding ${scores.length} scores to distribution contract `)
 
@@ -187,7 +191,9 @@ export class StakingRewardsService {
         // Tag names must be lowercase for the ans104 signature round-trip; the node
         // presents them title-cased to the contract (`ctx.tags['Round-Timestamp']`).
         tags: [{ name: 'round-timestamp', value: stamp.toString() }],
-        data: JSON.stringify({ Scores: scores })
+        // `Network` is omitted when absent rather than sent as null: the contract treats the key
+        // as optional, and only the first batch of a round carries it.
+        data: JSON.stringify(network ? { Scores: scores, Network: network } : { Scores: scores })
       })
 
       this.logger.log(

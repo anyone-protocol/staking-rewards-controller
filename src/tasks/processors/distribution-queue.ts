@@ -4,7 +4,7 @@ import { Job } from 'bullmq'
 import { DistributionService } from 'src/distribution/distribution.service'
 import { TasksService } from '../tasks.service'
 import { ScoreData } from 'src/distribution/schemas/score-data'
-import { AddScoresResult } from 'src/distribution/dto/add-scores'
+import { AddScoresResult, NetworkCounts } from 'src/distribution/dto/add-scores'
 
 @Processor('distribution-queue')
 export class DistributionQueue extends WorkerHost {
@@ -55,7 +55,7 @@ export class DistributionQueue extends WorkerHost {
 
   async startDistributionHandler(job: Job<number, boolean, string>): Promise<boolean> {
     return this.distribution.getCurrentScores(job.data).then(
-      scores => {
+      ({ scores, network }) => {
         const scoreGroups = this.distribution.groupScoreJobs(scores)
 
         this.tasks.distributionFlow.add(
@@ -63,6 +63,7 @@ export class DistributionQueue extends WorkerHost {
             stamp: job.data,
             total: scores.length,
             scoreGroups: scoreGroups,
+            network,
           })
         )
 
@@ -79,13 +80,17 @@ export class DistributionQueue extends WorkerHost {
   }
 
   async addScoresHandler(
-    job: Job<{ stamp: number; scores: ScoreData[] }, AddScoresResult, string>
+    job: Job<
+      { stamp: number; scores: ScoreData[]; network?: NetworkCounts },
+      AddScoresResult,
+      string
+    >
   ): Promise<AddScoresResult> {
     try {
       if (job.data != undefined) {
         this.logger.log(`Adding ${job.data.scores.length} scores for ${job.data.stamp}`)
 
-        return this.distribution.addScores(job.data.stamp, job.data.scores).then(
+        return this.distribution.addScores(job.data.stamp, job.data.scores, job.data.network).then(
           result => ({
             result: result,
             stamp: job.data.stamp,

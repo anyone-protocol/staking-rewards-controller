@@ -3,7 +3,7 @@ import { ScoreData } from './schemas/score-data'
 import { ConfigService } from '@nestjs/config'
 import _ from 'lodash'
 import { StakingRewardsService } from 'src/staking-rewards/staking-rewards.service'
-import { AddScoresData } from './dto/add-scores'
+import { AddScoresData, NetworkCounts } from './dto/add-scores'
 import RoundSnapshot from './dto/round-snapshot'
 import { HttpService } from '@nestjs/axios'
 import { AxiosError } from 'axios'
@@ -128,7 +128,16 @@ export class DistributionService {
     return relays
   }
 
-  public async getCurrentScores(stamp: number): Promise<ScoreData[]> {
+  /**
+   * Returns the round's scores AND the per-operator relay counts they were derived from.
+   *
+   * The counts used to be reachable only as each score's `Running` quotient, which loses the
+   * numerator and denominator and omits operators with no stake entirely. They are returned
+   * alongside so the round can carry them to the contract — see `NetworkCounts`.
+   */
+  public async getCurrentScores(
+    stamp: number
+  ): Promise<{ scores: ScoreData[]; network: NetworkCounts }> {
     const relaysData = await this.fetchRelays()
     const { locksData, stakingData, locksCount } = await this.stakingRewardsService.getHodlerData()
     const { verified: verificationData, hardware: isHardware } =
@@ -233,10 +242,25 @@ export class DistributionService {
       }
     }
 
-    return scores
+    // Uppercased to match how Scores addresses are normalized on the wire below; the contract
+    // canonicalizes both to EIP-55 on arrival.
+    const network: NetworkCounts = {}
+    Object.keys(data).forEach(operator => {
+      network['0x' + operator.substring(2).toUpperCase()] = {
+        Expected: data[operator].expected,
+        Running: data[operator].running,
+        Found: data[operator].found,
+      }
+    })
+
+    return { scores, network }
   }
 
-  public async addScores(stamp: number, scores: ScoreData[]): Promise<boolean> {
+  public async addScores(
+    stamp: number,
+    scores: ScoreData[],
+    network?: NetworkCounts
+  ): Promise<boolean> {
     const scoresForLua: AddScoresData = {}
     scores.forEach(score => {
       const hodlerNormalized = '0x' + score.Hodler.substring(2).toUpperCase()
@@ -251,7 +275,7 @@ export class DistributionService {
       }
     })
 
-    return this.stakingRewardsService.addScores(stamp, scoresForLua)
+    return this.stakingRewardsService.addScores(stamp, scoresForLua, network)
   }
 
   public async complete(stamp: number): Promise<boolean> {
