@@ -42,7 +42,7 @@ job "staking-rewards-controller-stage" {
         VERSION = var.commit_sha
         REDIS_MODE="sentinel"
         REDIS_MASTER_NAME="operator-checks-stage-redis-master"
-        ROUND_PERIOD_SECONDS="900"
+        ROUND_PERIOD_SECONDS="3600"
         DO_CLEAN="true"
         PORT="${NOMAD_PORT_http}"
         NO_COLOR="1"
