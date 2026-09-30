@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/comm
 import { InjectQueue, InjectFlowProducer } from '@nestjs/bullmq'
 import { Queue, FlowProducer, FlowJob } from 'bullmq'
 import { ScoreData } from '../distribution/schemas/score-data'
+import { NetworkCounts } from '../distribution/dto/add-scores'
 import { ConfigService } from '@nestjs/config'
 import { ClusterService } from '../cluster/cluster.service'
 import { InjectModel } from '@nestjs/mongoose'
@@ -28,10 +29,12 @@ export class TasksService implements OnApplicationBootstrap {
     stamp,
     total,
     scoreGroups,
+    network,
   }: {
     stamp: number
     total: number
     scoreGroups: ScoreData[][]
+    network?: NetworkCounts
   }): FlowJob {
     return {
       name: 'persist-last-round',
@@ -44,11 +47,14 @@ export class TasksService implements OnApplicationBootstrap {
           queueName: 'distribution-queue',
           opts: TasksService.jobOpts,
           data: { stamp, total },
+          // The per-operator relay counts ride on the FIRST batch only. They describe the round,
+          // not the batch, and the contract takes the last submission per operator — so sending
+          // them with every batch would just repeat the same payload once per group.
           children: scoreGroups.map((scores, index, array) => ({
             name: 'add-scores',
             queueName: 'distribution-queue',
             opts: TasksService.jobOpts,
-            data: { stamp, scores },
+            data: index === 0 ? { stamp, scores, network } : { stamp, scores },
           })),
         },
       ],

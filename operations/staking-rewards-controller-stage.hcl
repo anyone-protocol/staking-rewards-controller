@@ -42,12 +42,15 @@ job "staking-rewards-controller-stage" {
         VERSION = var.commit_sha
         REDIS_MODE="sentinel"
         REDIS_MASTER_NAME="operator-checks-stage-redis-master"
-        ROUND_PERIOD_SECONDS="900"
+        ROUND_PERIOD_SECONDS="3600"
         DO_CLEAN="true"
         PORT="${NOMAD_PORT_http}"
         NO_COLOR="1"
         MIN_HEALTHY_CONSENSUS_WEIGHT="50"
-        CU_URL="https://cu-stage.anyone.tech"
+        # Our own HyperBEAM node — replaces CU_URL (D17). The edge whitelists
+        # `/~meta@1.0` and `^/{contract-pid}`, covering both the `~process@1.0/now/...`
+        # reads and the `~process@1.0/push` writes.
+        HB_URL="https://hb-stage.anyone.tech"
         ONIONOO_REQUEST_TIMEOUT="60000"
         ONIONOO_REQUEST_MAX_REDIRECTS="3"
         IS_LOCAL_LEADER="true"
@@ -55,9 +58,9 @@ job "staking-rewards-controller-stage" {
         CONSUL_HOST="${NOMAD_IP_http}"
         CONSUL_PORT="8500"
         CONSUL_SERVICE_NAME="staking-rewards-controller-stage"
-        BUNDLER_GATEWAY="https://ar.anyone.tech"
-        BUNDLER_NODE="https://upload.ardrive.io"
-        # BUNDLER_NODE="https://ar.anyone.tech/bundler"
+        # Our own node once /~bundler@1.0/tx is edge-allowed + the signer is faff-allow-listed:
+        #   BUNDLER_NODE="https://hb.anyone.tech"
+        BUNDLER_NODE="https://up.arweave.net"
       }
 
       vault {
@@ -93,9 +96,6 @@ job "staking-rewards-controller-stage" {
         REDIS_SENTINEL_3_HOST={{ .Address }}
         REDIS_SENTINEL_3_PORT={{ .Port }}
         {{- end }}
-        {{- range service "api-service-stage" }}
-        ANYONE_API_URL="http://{{ .Address }}:{{ .Port }}"
-        {{- end }}
         EOH
         destination = "local/config.env"
         env         = true
@@ -106,7 +106,6 @@ job "staking-rewards-controller-stage" {
         {{ $allocIndex := env "NOMAD_ALLOC_INDEX" }}
         {{ with secret "kv/stage-protocol/staking-rewards-controller-stage" }}
         STAKING_REWARDS_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
-        BUNDLER_NETWORK="{{.Data.data.BUNDLER_NETWORK}}"
         BUNDLER_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
         CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
         EVM_JSON_RPC="https://sepolia.infura.io/v3/{{ index .Data.data (print `INFURA_API_KEY_` $allocIndex) }}"

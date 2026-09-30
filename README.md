@@ -149,7 +149,6 @@ addresses, Vault for secrets.
 | --- | --- |
 | `ONIONOO_DETAILS_URI` | Onionoo `/details` endpoint for relay data. **Required for scoring.** |
 | `DETAILS_URI_AUTH` | Optional `Authorization` header value for the details endpoint. |
-| `ANYONE_API_URL` | ANYONE API base URL. |
 
 ### EVM / HODLER contract
 
@@ -165,7 +164,7 @@ addresses, Vault for secrets.
 | --- | --- |
 | `STAKING_REWARDS_PROCESS_ID` | AO process ID for the staking rewards process (`Add-Scores`, `Complete-Round`, `Last-Snapshot`). |
 | `OPERATOR_REGISTRY_PROCESS_ID` | AO process ID for the operator registry (`View-State`). |
-| `CU_URL` | AO Compute Unit URL used by `@permaweb/aoconnect`. |
+| `HB_URL` | Our HyperBEAM node, e.g. `https://hb.anyone.tech`. No default — the service refuses to start without it. |
 
 ### Arweave bundling (ArDrive Turbo)
 
