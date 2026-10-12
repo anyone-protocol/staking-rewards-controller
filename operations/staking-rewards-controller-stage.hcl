@@ -75,30 +75,34 @@ job "staking-rewards-controller-stage" {
         OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/stage/operator-registry-address" }}"
         TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/sepolia/stage/address" }}"
         HODLER_CONTRACT_ADDRESS="{{ key "hodler/sepolia/stage/address" }}"
-        {{- range service "validator-stage-mongo" }}
+        {{- range service "validator-stage-mongo|any" }}
         MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-stage2"
         {{- end }}
-        {{- range service "onionoo-war-live" }}
+        {{- range service "onionoo-war-live|any" }}
         ONIONOO_DETAILS_URI="http://{{ .Address }}:{{ .Port }}/details"
         {{- end }}
-        {{- range service "staking-rewards-controller-stage-redis-master" }}
+        {{- range service "staking-rewards-controller-stage-redis-master|any" }}
         REDIS_MASTER_NAME="{{ .Name }}"
         {{- end }}
-        {{- range service "staking-rewards-controller-stage-sentinel-1" }}
+        {{- range service "staking-rewards-controller-stage-sentinel-1|any" }}
         REDIS_SENTINEL_1_HOST={{ .Address }}
         REDIS_SENTINEL_1_PORT={{ .Port }}
         {{- end }}
-        {{- range service "staking-rewards-controller-stage-sentinel-2" }}
+        {{- range service "staking-rewards-controller-stage-sentinel-2|any" }}
         REDIS_SENTINEL_2_HOST={{ .Address }}
         REDIS_SENTINEL_2_PORT={{ .Port }}
         {{- end }}
-        {{- range service "staking-rewards-controller-stage-sentinel-3" }}
+        {{- range service "staking-rewards-controller-stage-sentinel-3|any" }}
         REDIS_SENTINEL_3_HOST={{ .Address }}
         REDIS_SENTINEL_3_PORT={{ .Port }}
         {{- end }}
         EOH
         destination = "local/config.env"
         env         = true
+        wait {
+          min = "30s"
+          max = "90s"
+        }
       }
 
       template {
