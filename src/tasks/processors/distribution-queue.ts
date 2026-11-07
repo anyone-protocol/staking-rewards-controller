@@ -74,7 +74,7 @@ export class DistributionQueue extends WorkerHost {
       },
       error => {
         this.logger.error(`Exception while starting distribution: ${error.message}`, error.stack)
-        return false
+        throw error
       }
     )
   }
@@ -126,8 +126,14 @@ export class DistributionQueue extends WorkerHost {
         { processed: 0, failed: 0 }
       )
 
-      if (processed < job.data.total) {
-        this.logger.warn(`Processed less scores (${processed}) then the total found (${job.data.total})`)
+      if (processed == 0 && job.data.total > 0) {
+        this.logger.error(
+          `[alarm=scores-not-accepted] Processed less scores (${processed}) then the total found (${job.data.total})`
+        )
+      } else if (processed < job.data.total) {
+        this.logger.error(
+          `[alarm=scores-partially-accepted] Processed less scores (${processed}) then the total found (${job.data.total})`
+        )
       } else if (processed == 0) {
         this.logger.warn(`No scores found to process`)
       } else {
