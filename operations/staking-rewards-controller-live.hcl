@@ -1,7 +1,7 @@
 variable "commit_sha" {
   type        = string
   description = "The git commit SHA to use for the runtime image tag"
-  default     = "437fa70f3d89a71e681f25a8dae5b6f33215ab63"
+  default     = "ba281d68d96247f40e87bdd59765d103b288b85e"
 }
 
 job "staking-rewards-controller-live" {
@@ -48,11 +48,6 @@ job "staking-rewards-controller-live" {
         PORT="${NOMAD_PORT_http}"
         NO_COLOR="1"
         MIN_HEALTHY_CONSENSUS_WEIGHT="50"
-        
-        # Our own HyperBEAM node — replaces CU_URL (D17). The edge whitelists
-        # `/~meta@1.0` and `^/{contract-pid}`, covering both the `~process@1.0/now/...`
-        # reads and the `~process@1.0/push` writes.
-        HB_URL="https://hb.anyone.tech"
         ONIONOO_REQUEST_TIMEOUT="60000"
         ONIONOO_REQUEST_MAX_REDIRECTS="3"
         IS_LOCAL_LEADER="true"
@@ -72,13 +67,31 @@ job "staking-rewards-controller-live" {
       consul {}
 
       template {
+        data = <<-EOH
+        {{- with secret "kv/live-protocol/staking-rewards-controller-live" }}
+        {{- $user := .Data.data.MONGO_USER }}
+        {{- $pass := .Data.data.MONGO_PASS }}
+        {{- range service "validator-live-mongo|any" }}
+        MONGO_URI="mongodb://{{ $user }}:{{ $pass }}@{{ .Address }}:{{ .Port }}/staking-rewards-controller-ethereum"
+        {{- end }}
+        {{- end }}
+        EOH
+        destination = "secrets/mongo.env"
+        env         = true
+        wait {
+          min = "30s"
+          max = "90s"
+        }
+      }
+
+      template {
         data = <<EOH
         STAKING_REWARDS_PROCESS_ID="{{ key "smart-contracts/live/staking-rewards-address" }}"
         OPERATOR_REGISTRY_PROCESS_ID="{{ key "smart-contracts/live/operator-registry-address" }}"
         TOKEN_CONTRACT_ADDRESS="{{ key "ator-token/ethereum/live/address" }}"
         HODLER_CONTRACT_ADDRESS="{{ key "hodler/ethereum/live/address" }}"
-        {{- range service "validator-live-mongo|any" }}
-        MONGO_URI="mongodb://{{ .Address }}:{{ .Port }}/staking-rewards-controller-ethereum"
+        {{- range service "hyperbeam-live-node|any" }}
+        HB_URL="http://{{ .Address }}:{{ .Port }}"
         {{- end }}
         {{- range service "onionoo-war-live|any" }}
         ONIONOO_DETAILS_URI="http://{{ .Address }}:{{ .Port }}/details"
@@ -114,6 +127,7 @@ job "staking-rewards-controller-live" {
         STAKING_REWARDS_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
         BUNDLER_CONTROLLER_KEY="{{.Data.data.STAKING_REWARDS_CONTROLLER_KEY}}"
         CONSUL_TOKEN_CONTROLLER_CLUSTER="{{.Data.data.CONSUL_TOKEN_CONTROLLER_CLUSTER}}"
+        REDIS_PASSWORD="{{ .Data.data.REDIS_PASSWORD }}"
         EVM_JSON_RPC="https://mainnet.infura.io/v3/{{ index .Data.data (print `INFURA_API_KEY_` $allocIndex) }}"
         {{ end }}
         EOH
